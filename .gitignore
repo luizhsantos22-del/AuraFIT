@@ -34,6 +34,6 @@ Thumbs.db
 ehthumbs.db
 desktop.ini
 
-# Arquivos temporários e dumps de Banco de Dados
+# Arquivos temporários e dumps de Banco de Dadosa
 *.sql.gz
 *.dump

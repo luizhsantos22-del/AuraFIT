@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraFit - Produtos de Muay Thai</title>
+    <link rel="stylesheet" href="/css/estilos-produtos.css">
+</head>
+<body>
+
+    <!-- NAVBAR / CABEÇALHO DA AURAFIT -->
+    <header class="navbar">
+        <a href="#" class="logo-text">
+                <img src="img/landing/logo.png" alt="AuraFit Logo">
+            </a>
+        <nav class="nav-links">
+            <a href="/">Início</a>
+            <a href="/judo">Judô</a>
+            <a href="/muaythai"class="active">Muay Thai</a>
+            <a href="/crossfit">Crossfit</a>
+        </nav>
+        <div class="user-area">
+            <span class="welcome-msg">Bem vindo, Adm</span>
+            <a href="/usuarios" class="btn-admin">PAINEL ADMIN</a>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="container">
+        
+        <!-- BARRA DE TÍTULO E QUANTIDADE -->
+        <div class="category-header">
+            <h2>PRODUTOS DE MUAY THAI (<%= totalProdutos %>)</h2>
+        </div>
+
+        <!-- GRID DE PRODUTOS -->
+        <div class="products-grid">
+            <% if (produtos.length > 0) { %>
+                <% produtos.forEach(produto => { %>
+                    <div class="product-card">
+                        <div class="img-box">
+                            <img src="/IMG/upload/<%= produto.imagem_url || 'default.jpg' %>" alt="<%= produto.nome %>">
+                        </div>
+                        <div class="card-content">
+                            <h3 class="product-title"><%= produto.nome %></h3>
+                            <p class="product-price">
+                                R$ <%= Number(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                            </p>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p class="no-products">Nenhum produto cadastrado nesta categoria.</p>
+            <% } %>
+        </div>
+
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="footer">
+        <p>&copy; 2026 AuraFit - Sistema de Vendas esportiva</p>
+    </footer>
+
+</body>
+</html>

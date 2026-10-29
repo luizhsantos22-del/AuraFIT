@@ -1,0 +1,184 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #0b0d0c;
+    color: #ffffff;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 40px auto;
+    flex: 1;
+}
+
+/* ========================================
+   NAVBAR / CABEÇALHO DA AURAFIT
+======================================== */
+.navbar {
+    background-color: #0d5c38;
+    border-bottom: 1px solid #083c24;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.logo-text img {
+    width: 150px;
+    height: auto;
+    display: block;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #83e8b0;
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.welcome-msg {
+    font-size: 13px;
+    color: #e0e0e0;
+}
+
+.btn-admin {
+    background-color: #ffffff;
+    color: #0d5c38;
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-admin:hover {
+    background-color: #83e8b0;
+    color: #0b0d0c;
+}
+
+/* ========================================
+   BARRA DE TÍTULO
+======================================== */
+.category-header {
+    border-bottom: 2px solid #0d5c38;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+.category-header h2 {
+    font-size: 22px;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* ========================================
+   GRID DE PRODUTOS
+======================================== */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.product-card {
+    background-color: #ffffff;
+    color: #222222;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(13, 92, 56, 0.3);
+}
+
+.img-box {
+    width: 100%;
+    height: 220px;
+    background-color: #f5f5f5;
+    overflow: hidden;
+}
+
+.img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+}
+
+.product-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #111111;
+    margin-bottom: 12px;
+}
+
+.product-price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #0d5c38;
+}
+
+.no-products {
+    grid-column: 1 / -1;
+    color: #aaaaaa;
+    font-size: 16px;
+    text-align: center;
+    padding: 40px 0;
+}
+
+/* ========================================
+   RODAPÉ
+======================================== */
+.footer {
+    background-color: #0d5c38;
+    padding: 15px 0;
+    font-size: 13px;
+    color: #ffffff;
+    text-align: center;
+    border-top: 1px solid #083c24;
+    margin-top: auto;
+}

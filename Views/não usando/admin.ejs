@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraFit - Painel Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header>
+    <div class="top-bar">
+      <span>Usuário: <strong><%= usuario.nome %></strong></span>
+      <a href="/logout" class="btn-admin">SAIR</a>
+    </div>
+    <nav class="main-nav">
+      <a href="/" class="logo">
+        <img src="/IMG/Gemini_Generated_Image_yeyqwgyeyqwgyeyq-removebg-preview.png" alt="Logo do Sistema da AuraFit" width="150">      </a>
+      <ul class="nav-links">
+        <li><a href="/">Ver Site</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="admin-container">
+    <h2>Painel Geral de Gerenciamento</h2>
+    
+    <div class="admin-grid">
+      <a href="/eventos" class="admin-card">
+        <h3>Gestão de Eventos</h3>
+        <p>Cadastre, edite ou remova eventos esportivos.</p>
+      </a>
+
+      <a href="/categorias" class="admin-card">
+        <h3>Gestão de Categorias</h3>
+        <p>Organize as modalidades esportivas.</p>
+      </a>
+
+      <a href="/usuarios" class="admin-card">
+        <h3>Gestão de Usuários</h3>
+        <p>Gerencie os administradores do sistema.</p>
+      </a>
+
+      <a href="/participantes" class="admin-card">
+        <h3>Inscrições / Participantes</h3>
+        <p>Acompanhe os atletas inscritos em cada evento.</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-green-bar"></div>
+  <footer class="footer-copyright">
+    © 2026 AuraFit - Sistema de Vendas esportiva
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta - Minha Loja</title>
+    <link rel="stylesheet" href="/css/estilo-admin.css">
+</head>
+
+<body>
+    <div class="img-esquerda">
+        <img src="/IMG/Landing/logo.png" alt="">
+    </div>
+    <div class="auth-card">
+        <h2>Criar Conta</h2>
+        <p class="subtitle">Cadastre-se para realizar suas compras</p>
+
+        <form action="/cadastro" method="POST">
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cpf">CPF</label>
+                <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" required>
+            </div>
+
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" placeholder="Crie uma senha" required>
+            </div>
+
+            <button type="submit" class="btn-submit">Cadastrar</button>
+        </form>
+
+        <div class="footer-link">
+            Já possui uma conta? <a href="/login">Faça Login</a>
+        </div>
+        <a href="/" class="footer-link" style="margin-top: 0.5rem;">← Voltar para a loja</a>
+    </div>
+
+</body>
+
+</html>

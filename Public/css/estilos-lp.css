@@ -20,74 +20,67 @@ body {
 /* ========================================
    CABEÇALHO / NAVIGATION
 ======================================== */
-.cabecalho {
-    background-color: #0d5c38; 
+.navbar {
+    background-color: #0d5c38;
     border-bottom: 1px solid #083c24;
-    padding: 12px 0px;
-}
-
-.cabecalho-conteudo {
+    padding: 15px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.logo {
-    display: flex;
-    align-items: center;}
 
-.logo img {
+.logo-text img {
     width: 150px;
     height: auto;
     display: block;
 }
 
-.menu {
+.nav-links {
     display: flex;
     align-items: center;
-    gap: 35px;
+    gap: 30px;
 }
 
-.menu a {
+.nav-links a {
     color: #ffffff;
     text-decoration: none;
     font-weight: bold;
     font-size: 15px;
+    transition: color 0.3s;
 }
 
-.menu a:hover {
-    color: #a3e0bf;
+.nav-links a:hover,
+.nav-links a.active {
+    color: #83e8b0;
 }
 
-.usuario-menu {
+.user-area {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-.usuario-menu span {
-    font-size: 15px;
+.welcome-msg {
+    font-size: 13px;
     color: #e0e0e0;
 }
 
-.menu .botao-admin {
+.btn-admin {
     background-color: #ffffff;
     color: #0d5c38;
-    padding: 6px 12px;
+    padding: 7px 14px;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
+    text-decoration: none;
     text-transform: uppercase;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.menu .botao-admin:hover {
-    background-color: #e0e0e0;
-    color: #0d5c38;
-}
-
-.menu a:hover,
-.menu a.active {
-    color: #83e8b0;
+.btn-admin:hover {
+    background-color: #83e8b0;
+    color: #0b0d0c;
 }
 /* ========================================
    HERO / BUSCA

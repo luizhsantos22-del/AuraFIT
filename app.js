@@ -164,9 +164,57 @@ app.get("/crossfit", async (req, res) => {
     }
 });
 
+// ============================================
+// AUTENTICAÇÃO E CADASTRO DE CLIENTES
+// ============================================
+
+// Rota de Cadastro de Conta (GET)
+app.get('/cadastro', (req, res) => {
+       res.render("cadastro")
+});
+
+
+// Rota de Cadastro de Conta (POST)
+app.post('/cadastro', async (req, res) => {
+    const { nome, email, senha } = req.body;
+
+    try {
+        // Verificar se o e-mail já está em uso
+        const emailExistente = await BD.query(`
+            SELECT id FROM usuarios WHERE email = $1
+        `, [email]);
+
+        if (emailExistente.rows.length > 0) {
+            return res.render('cadastro', {
+                erro: 'Este e-mail já está cadastrado em nosso sistema.'
+            });
+        }
+
+        // Inserir novo usuário como cliente ativo (tipo = 'cliente', situacao = 1)
+        await BD.query(`
+            INSERT INTO usuarios (nome, email, senha, tipo, situacao)
+            VALUES ($1, $2, $3, 'cliente', 1)
+        `, [nome, email, senha]);
+
+        res.render('login', { 
+            erro: null,
+            sucesso: 'Conta criada com sucesso! Faça login para continuar.' 
+        });
+
+    } catch (erro) {
+        console.log('Erro ao cadastrar usuário: ' + erro);
+        res.render('cadastro', { erro: 'Erro interno ao criar sua conta. Tente novamente.' });
+    }
+});
+
 // Rota de Login (GET)
 app.get('/login', (req, res) => {
-    res.render('login', { erro: null });
+    /*
+    if (req.session.usuario) {
+        return res.redirect(req.session.usuario.tipo === 'admin' ? '/admin' : '/');
+    }
+    res.render('login', { erro: null, sucesso: null });*/
+    res.render("login")
 });
 
 // Rota de Login (POST)
@@ -181,17 +229,24 @@ app.post('/login', async (req, res) => {
 
         if (resultado.rows.length === 0) {
             return res.render('login', {
-                erro: 'E-mail ou senha inválidos'
+                erro: 'E-mail ou senha inválidos',
+                sucesso: null
             });
         }
 
-        // Gravar sessão
+        // Gravar sessão do usuário
         req.session.usuario = resultado.rows[0];
-        res.redirect('/admin');
+
+        // Redireciona conforme o perfil do usuário
+        if (resultado.rows[0].tipo === 'admin') {
+            res.redirect('/admin');
+        } else {
+            res.redirect('/');
+        }
 
     } catch (erro) {
         console.log('Erro ao fazer login: ' + erro);
-        res.render('login', { erro: 'Erro interno no servidor' });
+        res.render('login', { erro: 'Erro interno no servidor', sucesso: null });
     }
 });
 

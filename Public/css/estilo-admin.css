@@ -1,0 +1,127 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #218838;
+    display: flex;
+    justify-content: space-between;
+    min-height: 100vh;
+    background-size:cover;
+    height: 150px;;
+    
+}
+
+.img-esquerda{ 
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.img-esquerda img{
+    width: 600px;
+}
+
+.auth-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-card h2 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem 1rem;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 0.75rem 1rem;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #218838;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #218838;
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+    background-color: #218838;
+}
+
+.footer-link {
+    display: block;
+    text-align: center;
+    margin-top: 1.25rem;
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.footer-link a {
+    color: #218838;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.footer-link a:hover {
+    text-decoration: underline;
+}

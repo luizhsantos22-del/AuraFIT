@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Minha Loja</title>
+    
+        <link rel="stylesheet" href="/css/estilo-admin.css">
+    
+</head>
+<body>
+    <div class="img-esquerda">
+        <img src="/IMG/Landing/logo.png" alt="">
+    </div>
+    <div class="auth-card">
+        <h2>Acesse sua Conta</h2>
+
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" placeholder="seu@email.com" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" placeholder="Sua senha" required>
+            </div>
+
+            <button type="submit" class="btn-submit">Entrar</button>
+        </form>
+
+        <div class="footer-link">
+            Não tem uma conta? <a href="/cadastro">Cadastre-se</a>
+        </div>
+        <a href="/" class="footer-link" style="margin-top: 0.5rem;">← Voltar para a loja</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Produtos | AuraFit</title>
+  <link rel="stylesheet" href="/css/estilo-dash.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a href="/admin" class="logo-text">
+      <img src="/img/landing/logo.png" alt="AuraFit Logo">
+    </a>
+
+    <ul class="nav-menu">
+      <li><a href="/admin">Painel</a></li>
+      <li><a href="/produtos" class="ativo">Produtos</a></li>
+      <li><a href="/categorias">Categorias</a></li>
+      <li><a href="/usuarios">Usuários</a></li>
+      <li><a href="/vendas">Vendas</a></li>
+      <li><a href="/itens_venda">Itens Venda</a></li>
+    </ul>
+
+    <div class="user-nav">
+      <a href="/" class="btn-site">Ver Site</a>
+      <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="page-header">
+      <div>
+        <h1>Gestão de Produtos</h1>
+        <p>Gerencie o catálogo de equipamentos de Judô, Muay Thai e Crossfit da AuraFit.</p>
+      </div>
+      <button type="button" class="btn-primario" onclick="abrirModal()">+ Novo Produto</button>
+    </section>
+
+    <% 
+      const listaProdutos = typeof produtos !== 'undefined' ? produtos : [];
+      const listaCategorias = typeof categorias !== 'undefined' && categorias.length > 0 ? categorias : [
+        { id: 1, nome: 'Judô', descricao: 'Kimonos, faixas e acessórios para Judô' },
+        { id: 2, nome: 'Muay Thai', descricao: 'Luvas, caneleiras, calções e protetores' },
+        { id: 3, nome: 'Crossfit', descricao: 'Equipamentos e acessórios para treino' }
+      ];
+
+      const paginaAtual = typeof pagina !== 'undefined' ? Number(pagina) : 1;
+      const totalPaginasAtual = typeof totalPaginas !== 'undefined' ? Number(totalPaginas) : 1;
+      const buscaAtual = typeof busca !== 'undefined' ? busca : '';
+      const ordemAtual = typeof ordem !== 'undefined' ? ordem : '';
+
+      const totalProdutos = listaProdutos.length;
+      const totalEstoque = listaProdutos.reduce((acc, p) => acc + Number(p.estoque_atual || 0), 0);
+      const estoqueBaixo = listaProdutos.filter(p => Number(p.estoque_atual || 0) <= 5).length;
+
+      // Garante as 3 categorias do INSERT nas abas de filtro + eventuais extras do banco
+      const nomesBase = ['Judô', 'Muay Thai', 'Crossfit'];
+      const abasFiltro = [...nomesBase];
+      listaCategorias.forEach(cat => {
+        const jaExiste = abasFiltro.some(n => n.toLowerCase() === cat.nome.toLowerCase());
+        if (!jaExiste) abasFiltro.push(cat.nome);
+      });
+    %>
+
+    <section class="resumo-grid">
+      <div class="resumo-card">
+        <span>Total de Produtos</span>
+        <strong><%= totalProdutos %></strong>
+      </div>
+      <div class="resumo-card">
+        <span>Unidades em Estoque</span>
+        <strong><%= totalEstoque %> un.</strong>
+      </div>
+      <div class="resumo-card">
+        <span>Estoque Baixo (≤ 5 un.)</span>
+        <strong><%= estoqueBaixo %> <%= estoqueBaixo === 1 ? 'item' : 'itens' %></strong>
+      </div>
+    </section>
+
+    <section class="card-tabela">
+      <div class="toolbar">
+        <input type="text" id="buscaProduto" value="<%= buscaAtual %>" placeholder="Buscar por ID, nome ou modalidade (Judô, Muay Thai, Crossfit)..." onkeyup="filtrarProdutos()">
+        <div class="filtros">
+          <button type="button" class="btn-filtro ativo" onclick="mudarCategoria('todos', this)">Todas</button>
+          <% abasFiltro.forEach(nomeCat => { %>
+            <button type="button" class="btn-filtro" onclick="mudarCategoria('<%= nomeCat %>', this)"><%= nomeCat %></button>
+          <% }) %>
+        </div>
+      </div>
+
+      <table id="tabelaProdutos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Produto</th>
+            <th>Modalidade</th>
+            <th>Preço</th>
+            <th>Estoque</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (listaProdutos.length > 0) { %>
+            <% listaProdutos.forEach(p => { %>
+              <% 
+                const imgRaw = p.imagem_url || 'default.jpg';
+                const imgSrc = imgRaw.startsWith('http') || imgRaw.startsWith('/') ? imgRaw : '/IMG/upload/' + imgRaw;
+                const catNome = p.categoria_nome || p.categoria || 'Geral';
+                const estoqueQtd = Number(p.estoque_atual || 0);
+              %>
+              <tr data-categoria="<%= catNome %>">
+                <td><strong>#<%= p.id %></strong></td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="<%= imgSrc %>" alt="<%= p.nome %>" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div>
+                      <strong><%= p.nome %></strong><br>
+                      <small style="color: #64748b;"><%= p.descricao ? (p.descricao.length > 45 ? p.descricao.substring(0, 45) + '...' : p.descricao) : 'Sem descrição' %></small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="status status-confirmada"><%= catNome %></span>
+                </td>
+                <td>
+                  <strong style="color: #175936;">
+                    R$ <%= Number(p.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </strong>
+                </td>
+                <td>
+                  <span class="status <%= estoqueQtd <= 5 ? 'status-cancelada' : 'status-pendente' %>">
+                    <%= estoqueQtd %> un.
+                  </span>
+                </td>
+                <td>
+                  <div class="acoes">
+                    <button 
+                      type="button" 
+                      class="btn-acao btn-editar" 
+                      data-id="<%= p.id %>"
+                      data-nome="<%= p.nome %>"
+                      data-descricao="<%= p.descricao || '' %>"
+                      data-categoria="<%= p.categoria_id %>"
+                      data-preco="<%= p.preco %>"
+                      data-estoque="<%= p.estoque_atual %>"
+                      data-imagem="<%= p.imagem_url || '' %>"
+                      onclick="editarProduto(this)">
+                      Editar
+                    </button>
+                    <form action="/produtos/excluir/<%= p.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Deseja realmente excluir este produto?');">
+                      <button type="submit" class="btn-acao btn-excluir">Excluir</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 24px;">Nenhum produto cadastrado no sistema ainda.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <div class="paginacao">
+        <% if (paginaAtual > 1) { %>
+          <a class="btn btn-secundario"
+            href="/produtos?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual - 1 %>">
+            Anterior
+          </a>
+        <% } %>
+
+        <span class="paginacao-info">
+          Página <strong><%= paginaAtual %></strong>
+          de <strong><%= totalPaginasAtual %></strong>
+        </span>
+
+        <% if (paginaAtual < totalPaginasAtual) { %>
+          <a class="btn btn-secundario"
+            href="/produtos?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual + 1 %>">
+            Próxima
+          </a>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL PRODUTO (CADASTRAR E EDITAR) -->
+  <div class="modal-overlay" id="modalProduto">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="tituloModal">Novo Produto</h2>
+        <button type="button" class="close-modal" onclick="fecharModal()">&times;</button>
+      </div>
+
+      <form id="formProduto" action="/produtos/novo" method="POST">
+        <div class="form-group">
+          <label for="nome">Nome do Produto</label>
+          <input type="text" id="nome" name="nome" placeholder="Ex: Kimono Judô Trançado Reforçado" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="categoria_id">Modalidade</label>
+          <select id="categoria_id" name="categoria_id" required>
+            <option value="">Selecione uma modalidade...</option>
+            <% listaCategorias.forEach(cat => { %>
+              <option value="<%= cat.id %>"><%= cat.nome %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="preco">Preço (R$)</label>
+          <input type="number" id="preco" name="preco" step="0.01" min="0" placeholder="299.90" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="estoque_atual">Estoque Atual</label>
+          <input type="number" id="estoque_atual" name="estoque_atual" min="0" placeholder="15" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="imagem_url">Arquivo ou URL da Imagem</label>
+          <input type="text" id="imagem_url" name="imagem_url" placeholder="Ex: kimono.jpg">
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="descricao">Descrição</label>
+          <textarea id="descricao" name="descricao" rows="2" placeholder="Detalhes do equipamento..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-primario">Salvar Produto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
+
+  <script>
+    let categoriaAtual = 'todos';
+
+    function normalizarTexto(texto) {
+      return (texto || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    }
+
+    function abrirModal() {
+      document.getElementById('tituloModal').innerText = 'Novo Produto';
+      document.getElementById('formProduto').action = '/produtos/novo';
+      document.getElementById('formProduto').reset();
+      document.getElementById('modalProduto').classList.add('aberto');
+    }
+
+    function editarProduto(botao) {
+      const id = botao.getAttribute('data-id');
+      document.getElementById('tituloModal').innerText = 'Editar Produto #' + id;
+      document.getElementById('formProduto').action = '/produtos/editar/' + id;
+
+      document.getElementById('nome').value = botao.getAttribute('data-nome');
+      document.getElementById('descricao').value = botao.getAttribute('data-descricao');
+      document.getElementById('categoria_id').value = botao.getAttribute('data-categoria');
+      document.getElementById('preco').value = botao.getAttribute('data-preco');
+      document.getElementById('estoque_atual').value = botao.getAttribute('data-estoque');
+      document.getElementById('imagem_url').value = botao.getAttribute('data-imagem');
+
+      document.getElementById('modalProduto').classList.add('aberto');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalProduto').classList.remove('aberto');
+    }
+
+    function mudarCategoria(cat, btn) {
+      categoriaAtual = normalizarTexto(cat);
+      document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      filtrarProdutos();
+    }
+
+    function filtrarProdutos() {
+      const termo = normalizarTexto(document.getElementById('buscaProduto').value);
+      document.querySelectorAll('#tabelaProdutos tbody tr').forEach(tr => {
+        const cat = normalizarTexto(tr.getAttribute('data-categoria'));
+        if (!cat) return;
+        const bateCategoria = (categoriaAtual === 'todos' || cat === categoriaAtual);
+        const bateTexto = normalizarTexto(tr.innerText).includes(termo);
+        tr.style.display = (bateCategoria && bateTexto) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+
+</html>

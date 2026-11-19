@@ -3,6 +3,7 @@ const router = express.Router();
 const BD = require('../db');
 
 // Listar Produtos com Categoria
+// Listar Produtos com Categoria
 router.get('/', async (req, res) => {
     try {
         const sql = `
@@ -14,7 +15,12 @@ router.get('/', async (req, res) => {
             ORDER BY p.id ASC
         `;
         const resultado = await BD.query(sql);
-        res.render('produtos/index', { produtos: resultado.rows });
+        const categorias = await BD.query('SELECT * FROM categorias ORDER BY nome ASC');
+
+        res.render('produtos/index', { 
+            produtos: resultado.rows,
+            categorias: categorias.rows 
+        });
     } catch (erro) {
         console.log('Erro ao listar produtos: ' + erro);
         res.status(500).send('Erro ao buscar produtos');

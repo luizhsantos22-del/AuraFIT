@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraFit - Painel Admin</title>
+  <link rel="stylesheet" href="/css/estilo-adm.css">
+</head>
+<body>
+
+  <!-- CABEÇALHO SUPERIOR -->
+  <header class="navbar">
+        <a href="#" class="logo-text">
+                <img src="img/landing/logo.png" alt="AuraFit Logo">
+            </a>
+
+    <div class="user-nav">
+      <span class="user-badge">
+        <span class="status-dot"></span>
+        Usuário: <strong><%= typeof usuario !== 'undefined' && usuario ? usuario.nome : 'Administrador Geral' %></strong>
+      </span>
+      <a href="/" class="btn-site">Ver Site</a>
+      <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-container">
+    <section class="page-header">
+      <div>
+        <h1>Painel Geral de Gerenciamento</h1>
+        <p>Administre eventos, modalidades esportivas, usuários e inscrições da plataforma.</p>
+      </div>
+      <div class="tag-modalidades">
+        <span class="tag">Judô</span>
+        <span class="tag">Muay Thai</span>
+        <span class="tag">Crossfit</span>
+      </div>
+    </section>
+
+    <section class="modules-grid">
+      <!-- 1. Gestão de Produtos -->
+      <a href="/produtos" class="module-card">
+        <div class="icon-box">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h2>Gestão de Produtos</h2>
+          <p>Cadastre, edite ou remova produtos esportivos.</p>
+          <span class="card-action">Acessar módulo &rarr;</span>
+        </div>
+      </a>
+
+      <!-- 2. Gestão de Categorias -->
+      <a href="/categorias" class="module-card">
+        <div class="icon-box">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h2>Gestão de Categorias</h2>
+          <p>Organize as modalidades esportivas.</p>
+          <span class="card-action">Acessar módulo &rarr;</span>
+        </div>
+      </a>
+
+      <!-- 3. Gestão de Usuários -->
+      <a href="/usuarios" class="module-card">
+        <div class="icon-box">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h2>Gestão de Usuários</h2>
+          <p>Gerencie os administradores do sistema.</p>
+          <span class="card-action">Acessar módulo &rarr;</span>
+        </div>
+      </a>
+
+      <!-- 4. Vendas -->
+      <a href="/vendas" class="module-card">
+        <div class="icon-box">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <polyline points="16 11 18 13 22 9"></polyline>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h2>Vendas</h2>
+          <p>Acompanhe os produtos mais comprados pelos atletas.</p>
+          <span class="card-action">Acessar módulo &rarr;</span>
+        </div>
+      </a>
+
+      <!-- 5. Movimentação -->
+      <!-- 5. Itens Venda -->
+      <a href="/itens_venda" class="module-card">
+        <div class="icon-box">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <div class="card-content">
+          <h2>Itens Venda</h2>
+          <p>Acompanhe os produtos e quantidades detalhados em cada pedido.</p>
+          <span class="card-action">Acessar módulo &rarr;</span>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <!-- RODAPÉ -->
+  <footer class="footer">
+    © 2026 AuraFit - Sistema de Vendas Esportiva
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin | AuraFit</title>
+  <link rel="stylesheet" href="/css/estilo-adm.css">
+</head>
+<body>
+
+  <!-- CABEÇALHO PADRONIZADO -->
+  <header class="navbar">
+    <a href="/admin" class="logo-text">
+      <img src="/img/landing/logo.png" alt="AuraFit Logo">
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="/dashboard" class="ativo">Visão Geral</a></li>
+      <li><a href="/produtos">Produtos</a></li>
+      <li><a href="/categorias">Categorias</a></li>
+      <li><a href="/usuarios">Usuários</a></li>
+      <li><a href="/vendas">Vendas</a></li>
+      <li><a href="/itens_venda">Itens Venda</a></li>
+    </ul>
+
+    <div class="user-nav">
+      <span class="welcome-text">
+        Bem-vindo, <strong><%= typeof usuario !== 'undefined' && usuario ? usuario.nome : 'Adm' %></strong>
+      </span>
+      <a href="/" class="btn-site">Ver Loja</a>
+      <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="container">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Painel Administrativo</h1>
+        <p>Gerencie o catálogo de Judô, Muay Thai e Crossfit da AuraFit</p>
+      </div>
+      <button type="button" class="btn-novo" onclick="abrirModalCadastro()">+ Cadastrar Produto</button>
+    </div>
+
+    <% 
+      const stats = typeof metricas !== 'undefined' ? metricas : {
+        totalProdutos: 0,
+        pedidosHoje: 0,
+        faturamentoMes: 'R$ 0,00',
+        estoqueBaixo: 0
+      };
+      const listaProdutos = typeof produtos !== 'undefined' ? produtos : [];
+      const listaCategorias = typeof categorias !== 'undefined' ? categorias : [
+        { id: 1, nome: 'Judô' },
+        { id: 2, nome: 'Muay Thai' },
+        { id: 3, nome: 'Crossfit' }
+      ];
+    %>
+
+    <!-- CARDS DE MÉTRICAS -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Produtos Cadastrados</div>
+        <div class="kpi-value"><%= stats.totalProdutos %></div>
+      </div>
+      <div class="kpi-card destaque">
+        <div class="kpi-label">Faturamento Total</div>
+        <div class="kpi-value"><%= stats.faturamentoMes %></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pedidos Hoje</div>
+        <div class="kpi-value"><%= stats.pedidosHoje %></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Alerta de Estoque</div>
+        <div class="kpi-value"><%= stats.estoqueBaixo %> itens</div>
+      </div>
+    </section>
+
+    <!-- FILTROS E BUSCA -->
+    <section class="toolbar">
+      <div class="search-box">
+        <input type="text" id="campoBusca" placeholder="Buscar produto (Ex: Judô, Kimono)..." onkeyup="filtrarTabela()">
+      </div>
+
+      <div class="filter-tabs">
+        <button type="button" class="tab-btn active" onclick="filtrarCategoria('todos', this)">Todos</button>
+        <% listaCategorias.forEach(cat => { %>
+          <button type="button" class="tab-btn" onclick="filtrarCategoria('<%= cat.nome %>', this)"><%= cat.nome %></button>
+        <% }) %>
+      </div>
+    </section>
+
+    <!-- TABELA DE PRODUTOS -->
+    <section class="table-wrapper">
+      <table id="tabelaProdutos">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Modalidade</th>
+            <th>Preço</th>
+            <th>Estoque</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (listaProdutos.length === 0) { %>
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">
+                Nenhum produto cadastrado ainda.
+              </td>
+            </tr>
+          <% } else { %>
+            <% listaProdutos.forEach(produto => { %>
+              <% 
+                const imgRaw = produto.imagem_url || 'default.jpg';
+                const imgSrc = imgRaw.startsWith('http') || imgRaw.startsWith('/') ? imgRaw : '/IMG/upload/' + imgRaw;
+                
+                let classeBadge = 'badge-crossfit';
+                if (produto.categoria && produto.categoria.toLowerCase().includes('jud')) classeBadge = 'badge-judo';
+                if (produto.categoria && produto.categoria.toLowerCase().includes('muay')) classeBadge = 'badge-muaythai';
+              %>
+              <tr data-categoria="<%= produto.categoria %>">
+                <td>
+                  <div class="prod-info">
+                    <img src="<%= imgSrc %>" alt="<%= produto.nome %>" class="prod-img">
+                    <strong><%= produto.nome %></strong>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge <%= classeBadge %>"><%= produto.categoria %></span>
+                </td>
+                <td>
+                  R$ <%= Number(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                </td>
+                <td>
+                  <span class="<%= produto.estoque_atual <= 5 ? 'estoque-baixo' : '' %>">
+                    <%= produto.estoque_atual %> un.
+                  </span>
+                </td>
+                <td>
+                  <div class="acoes">
+                    <button 
+                      type="button" 
+                      class="btn-acao btn-editar" 
+                      onclick="abrirModalEdicao(
+                        '<%= produto.id %>', 
+                        '<%= produto.nome %>', 
+                        '<%= produto.descricao || '' %>',
+                        '<%= produto.categoria_id %>', 
+                        '<%= produto.preco %>', 
+                        '<%= produto.estoque_atual %>', 
+                        '<%= produto.imagem_url || '' %>'
+                      )">
+                      Editar
+                    </button>
+                    <form action="/produtos/excluir/<%= produto.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Deseja realmente excluir este item?');">
+                      <button type="submit" class="btn-acao btn-excluir">Excluir</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- MODAL PARA CADASTRAR / EDITAR PRODUTO -->
+  <div class="modal-overlay" id="modalProduto">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modalTitulo">Novo Produto AuraFit</h2>
+        <button type="button" class="close-modal" onclick="fecharModal()">&times;</button>
+      </div>
+
+      <!-- Aponta para /produtos/novo conforme produtosRoutes.js -->
+      <form id="formProduto" action="/produtos/novo" method="POST">
+        <div class="form-group">
+          <label for="nome">Nome do Produto</label>
+          <input type="text" id="nome" name="nome" placeholder="Ex: Kimono Judô Trançado" required>
+        </div>
+
+        <div class="form-group">
+          <label for="descricao">Descrição</label>
+          <input type="text" id="descricao" name="descricao" placeholder="Detalhes do produto...">
+        </div>
+
+        <div class="form-group">
+          <label for="categoria_id">Modalidade</label>
+          <select id="categoria_id" name="categoria_id" required>
+            <% listaCategorias.forEach(cat => { %>
+              <option value="<%= cat.id %>"><%= cat.nome %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="preco">Preço (R$)</label>
+          <input type="number" id="preco" name="preco" step="0.01" placeholder="299.90" required>
+        </div>
+
+        <div class="form-group">
+          <label for="estoque_atual">Quantidade em Estoque</label>
+          <input type="number" id="estoque_atual" name="estoque_atual" placeholder="10" required>
+        </div>
+
+        <div class="form-group">
+          <label for="imagem_url">Nome do Arquivo ou URL da Imagem</label>
+          <input type="text" id="imagem_url" name="imagem_url" placeholder="Ex: kimono.jpg">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="tab-btn" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-novo">Salvar Produto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RODAPÉ PADRONIZADO -->
+  <footer class="footer">
+    © 2026 AuraFit - Sistema de Vendas Esportiva
+  </footer>
+
+  <!-- SCRIPTS DE INTERAÇÃO (MODAL E FILTROS) -->
+  <script>
+    let categoriaAtual = 'todos';
+
+    function abrirModalCadastro() {
+      document.getElementById('modalTitulo').innerText = 'Novo Produto AuraFit';
+      document.getElementById('formProduto').action = '/produtos/novo';
+      document.getElementById('nome').value = '';
+      document.getElementById('descricao').value = '';
+      document.getElementById('categoria_id').selectedIndex = 0;
+      document.getElementById('preco').value = '';
+      document.getElementById('estoque_atual').value = '';
+      document.getElementById('imagem_url').value = '';
+      document.getElementById('modalProduto').classList.add('aberto');
+    }
+
+    function abrirModalEdicao(id, nome, descricao, categoriaId, preco, estoque, imagem) {
+      document.getElementById('modalTitulo').innerText = 'Editar Produto';
+      document.getElementById('formProduto').action = '/produtos/editar/' + id;
+      document.getElementById('nome').value = nome;
+      document.getElementById('descricao').value = descricao;
+      document.getElementById('categoria_id').value = categoriaId;
+      document.getElementById('preco').value = preco;
+      document.getElementById('estoque_atual').value = estoque;
+      document.getElementById('imagem_url').value = imagem;
+      document.getElementById('modalProduto').classList.add('aberto');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalProduto').classList.remove('aberto');
+    }
+
+    function filtrarCategoria(categoria, botao) {
+      categoriaAtual = categoria;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      botao.classList.add('active');
+      filtrarTabela();
+    }
+
+    function filtrarTabela() {
+      const termo = document.getElementById('campoBusca').value.toLowerCase();
+      const linhas = document.querySelectorAll('#tabelaProdutos tbody tr');
+
+      linhas.forEach(linha => {
+        const catLinha = linha.getAttribute('data-categoria');
+        if (!catLinha) return;
+
+        const textoLinha = linha.innerText.toLowerCase();
+        const bateCategoria = (categoriaAtual === 'todos' || catLinha === categoriaAtual);
+        const bateBusca = textoLinha.includes(termo);
+
+        linha.style.display = (bateCategoria && bateBusca) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

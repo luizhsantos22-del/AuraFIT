@@ -1,0 +1,45 @@
+<%- include('../includes/header', { titulo: "Cadastrar Usuário", usuario: typeof usuario !== 'undefined' ? usuario : null }) %>
+
+<main class="conteudo">
+  <div class="cabecalho-conteudo">
+    <div>
+      <h1>Cadastrar Usuário</h1>
+      <p>Adicione um novo administrador ou operador com acesso ao painel da AuraFit.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <form action="/usuarios/novo" method="POST">
+      <div class="campo-formulario">
+        <label for="nome">Nome Completo</label>
+        <input type="text" id="nome" name="nome" placeholder="Ex.: Carlos Silva" required maxlength="100" minlength="3" autofocus>
+      </div>
+
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="email">E-mail de Acesso</label>
+        <input type="email" id="email" name="email" placeholder="Ex.: carlos@aurafit.com.br" required maxlength="120">
+      </div>
+
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" placeholder="••••••••" required minlength="6">
+      </div>
+
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="perfil">Perfil de Acesso</label>
+        <select id="perfil" name="perfil" required>
+          <option value="">Selecione um perfil...</option>
+          <option value="Administrador Geral">Administrador Geral</option>
+          <option value="Organizador">Organizador</option>
+        </select>
+      </div>
+
+      <div class="botoes-formulario" style="margin-top:20px">
+        <a class="btn btn-muted" href="/usuarios">Cancelar</a>
+        <button class="btn btn-primario" type="submit">Salvar Usuário</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('../includes/footer') %>

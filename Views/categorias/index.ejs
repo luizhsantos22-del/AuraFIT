@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Categorias | AuraFit</title>
+  <link rel="stylesheet" href="/css/estilo-dash.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a href="/admin" class="logo-text">
+      <img src="/img/landing/logo.png" alt="AuraFit Logo">
+    </a>
+
+    <ul class="nav-menu">
+      <li><a href="/admin">Painel</a></li>
+      <li><a href="/produtos">Produtos</a></li>
+      <li><a href="/categorias" class="ativo">Categorias</a></li>
+      <li><a href="/usuarios">Usuários</a></li>
+      <li><a href="/vendas">Vendas</a></li>
+      <li><a href="/itens_venda">Itens Venda</a></li>
+    </ul>
+
+    <div class="user-nav">
+      <a href="/" class="btn-site">Ver Site</a>
+      <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="page-header">
+      <div>
+        <h1>Gestão de Categorias</h1>
+        <p>Organize as modalidades esportivas disponíveis no catálogo da plataforma AuraFit.</p>
+      </div>
+      <button type="button" class="btn-primario" onclick="abrirModal()">+ Nova Categoria</button>
+    </section>
+
+    <% 
+      const listaCategorias = typeof categorias !== 'undefined' ? categorias : [];
+      const paginaAtual = typeof pagina !== 'undefined' ? Number(pagina) : 1;
+      const totalPaginasAtual = typeof totalPaginas !== 'undefined' ? Number(totalPaginas) : 1;
+      const buscaAtual = typeof busca !== 'undefined' ? busca : '';
+      const ordemAtual = typeof ordem !== 'undefined' ? ordem : '';
+
+      const totalCategorias = listaCategorias.length;
+      const comDescricao = listaCategorias.filter(c => c.descricao && c.descricao.trim() !== '').length;
+      const semDescricao = totalCategorias - comDescricao;
+    %>
+
+    <section class="resumo-grid">
+      <div class="resumo-card">
+        <span>Total de Modalidades</span>
+        <strong><%= totalCategorias %></strong>
+      </div>
+      <div class="resumo-card">
+        <span>Modalidades Ativas</span>
+        <strong><%= totalCategorias %></strong>
+      </div>
+      <div class="resumo-card">
+        <span>Com Descrição Detalhada</span>
+        <strong><%= comDescricao %></strong>
+      </div>
+    </section>
+
+    <section class="card-tabela">
+      <div class="toolbar">
+        <input type="text" id="buscaCategoria" value="<%= buscaAtual %>" placeholder="Buscar por ID, modalidade ou descrição..." onkeyup="filtrarTabela()">
+      </div>
+
+      <table id="tabelaCategorias">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Modalidade</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (listaCategorias.length > 0) { %>
+            <% listaCategorias.forEach(cat => { %>
+              <tr>
+                <td><strong>#<%= cat.id %></strong></td>
+                <td><strong><%= cat.nome %></strong></td>
+                <td style="color: #475569;"><%= cat.descricao && cat.descricao.trim() !== '' ? cat.descricao : 'Sem descrição cadastrada' %></td>
+                <td><span class="status status-confirmada">Ativa</span></td>
+                <td>
+                  <div class="acoes">
+                    <button 
+                      type="button" 
+                      class="btn-acao btn-editar" 
+                      data-id="<%= cat.id %>"
+                      data-nome="<%= cat.nome %>"
+                      data-descricao="<%= cat.descricao || '' %>"
+                      onclick="editarCategoria(this)">
+                      Editar
+                    </button>
+                    <form action="/categorias/excluir/<%= cat.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Deseja realmente excluir esta categoria?');">
+                      <button type="submit" class="btn-acao btn-excluir">Excluir</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 24px;">Nenhuma categoria cadastrada no sistema ainda.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <div class="paginacao">
+        <% if (paginaAtual > 1) { %>
+          <a class="btn btn-secundario"
+            href="/categorias?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual - 1 %>">
+            Anterior
+          </a>
+        <% } %>
+
+        <span class="paginacao-info">
+          Página <strong><%= paginaAtual %></strong>
+          de <strong><%= totalPaginasAtual %></strong>
+        </span>
+
+        <% if (paginaAtual < totalPaginasAtual) { %>
+          <a class="btn btn-secundario"
+            href="/categorias?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual + 1 %>">
+            Próxima
+          </a>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL CADASTRAR / EDITAR CATEGORIA -->
+  <div class="modal-overlay" id="modalCategoria">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="tituloModal">Nova Categoria</h2>
+        <button type="button" class="close-modal" onclick="fecharModal()">&times;</button>
+      </div>
+
+      <form id="formCategoria" action="/categorias/novo" method="POST">
+        <div class="form-group">
+          <label for="nome">Nome da Modalidade</label>
+          <input type="text" id="nome" name="nome" placeholder="Ex: Jiu-Jitsu, Boxe, MMA..." required maxlength="80" minlength="2">
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="descricao">Descrição</label>
+          <textarea id="descricao" name="descricao" rows="3" placeholder="Breve descrição da modalidade esportiva..." maxlength="255"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-primario">Salvar Categoria</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
+
+  <script>
+    function abrirModal() {
+      document.getElementById('tituloModal').innerText = 'Nova Categoria';
+      document.getElementById('formCategoria').action = '/categorias/novo';
+      document.getElementById('formCategoria').reset();
+      document.getElementById('modalCategoria').classList.add('aberto');
+    }
+
+    function editarCategoria(botao) {
+      const id = botao.getAttribute('data-id');
+      const nome = botao.getAttribute('data-nome');
+      const descricao = botao.getAttribute('data-descricao');
+
+      document.getElementById('tituloModal').innerText = 'Editar Categoria #' + id;
+      document.getElementById('formCategoria').action = '/categorias/editar/' + id;
+      document.getElementById('nome').value = nome;
+      document.getElementById('descricao').value = descricao;
+      document.getElementById('modalCategoria').classList.add('aberto');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalCategoria').classList.remove('aberto');
+    }
+
+    function filtrarTabela() {
+      const termo = document.getElementById('buscaCategoria').value.toLowerCase();
+      document.querySelectorAll('#tabelaCategorias tbody tr').forEach(tr => {
+        if (tr.children.length === 1) return;
+        tr.style.display = tr.innerText.toLowerCase().includes(termo) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+
+</html>

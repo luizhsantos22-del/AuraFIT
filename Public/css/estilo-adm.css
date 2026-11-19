@@ -1,0 +1,284 @@
+:root {
+      --verde-principal: #175936;
+      --verde-escuro: #0f3f26;
+      --verde-neon: #5ad439;
+      --fundo-pagina: #f4f7f5;
+      --branco: #ffffff;
+      --texto-titulo: #1e293b;
+      --texto-suave: #64748b;
+      --borda: #e2e8f0;
+      --vermelho: #dc2626;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      background-color: var(--fundo-pagina);
+      color: var(--texto-titulo);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ================= TOPBAR (IDENTIDADE AURAFIT) ================= */
+    .navbar{
+     background-color: #0d5c38;
+    border-bottom: 1px solid #083c24;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    }
+
+    .logo-text img {
+    width: 150px;
+    height: auto;
+    display: block;
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .user-nav {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .user-badge {
+      color: #e2e8f0;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .user-badge strong {
+      color: var(--branco);
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--verde-neon);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .btn-site {
+      background-color: var(--branco);
+      color: var(--verde-principal);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      border-radius: 5px;
+      transition: 0.2s;
+    }
+
+    .btn-site:hover {
+      background-color: var(--verde-neon);
+      color: var(--verde-escuro);
+    }
+
+    .btn-sair {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--branco);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 5px;
+      transition: 0.2s;
+    }
+
+    .btn-sair:hover {
+      background-color: var(--vermelho);
+      border-color: var(--vermelho);
+    }
+    /* ================= ÁREA PRINCIPAL ================= */
+    .main-container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 44px auto;
+      padding: 0 24px;
+      flex: 1;
+    }
+
+    .page-header {
+      background-color: var(--branco);
+      padding: 28px 32px;
+      border-radius: 10px;
+      border: 1px solid var(--borda);
+      border-left: 6px solid var(--verde-principal);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--verde-principal);
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: var(--texto-suave);
+      margin-top: 6px;
+    }
+
+    .tag-modalidades {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      background-color: #ecfdf5;
+      color: var(--verde-principal);
+      border: 1px solid #bbf7d0;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+
+    /* ================= GRADE DE MÓDULOS ================= */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .module-card {
+      background-color: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      padding: 28px;
+      text-decoration: none;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      transition: all 0.22s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: var(--verde-principal);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s ease;
+    }
+
+    .module-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(23, 89, 54, 0.12);
+      border-color: #cbd5e1;
+    }
+
+    .module-card:hover::after {
+      transform: scaleX(1);
+    }
+
+    .icon-box {
+      width: 54px;
+      height: 54px;
+      min-width: 54px;
+      background-color: #ecfdf5;
+      color: var(--verde-principal);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+
+    .module-card:hover .icon-box {
+      background-color: var(--verde-principal);
+      color: var(--branco);
+    }
+
+    .card-content {
+      flex: 1;
+    }
+
+    .card-content h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--texto-titulo);
+      margin-bottom: 6px;
+      transition: 0.2s;
+    }
+
+    .module-card:hover .card-content h2 {
+      color: var(--verde-principal);
+    }
+
+    .card-content p {
+      font-size: 13.5px;
+      color: var(--texto-suave);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .card-action {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--verde-principal);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* ================= RODAPÉ ================= */
+    .footer {
+      background-color: var(--branco);
+      border-top: 1px solid var(--borda);
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+      color: var(--texto-suave);
+      margin-top: auto;
+    }
+
+    /* ================= RESPONSIVIDADE ================= */
+    @media (max-width: 768px) {
+      .topbar {
+        height: auto;
+        padding: 16px 5%;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+

@@ -33,7 +33,6 @@ body {
     align-items: center;
 }
 
-
 .logo-text img {
     width: 150px;
     height: auto;
@@ -171,14 +170,36 @@ body {
 }
 
 /* ========================================
-   RODAPÉ
+   PAGINAÇÃO
 ======================================== */
-.footer {
-    background-color: #0d5c38;
-    padding: 15px 0;
-    font-size: 13px;
-    color: #ffffff;
-    text-align: center;
-    border-top: 1px solid #083c24;
-    margin-top: auto;
+.paginacao {
+    margin-top: 35px;
+    padding-top: 20px;
+    border-top: 1px solid #1e2421;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
+
+.paginacao-info {
+    font-size: 14px;
+    color: #cccccc;
+}
+
+.paginacao-info strong {
+    color: #83e8b0;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background

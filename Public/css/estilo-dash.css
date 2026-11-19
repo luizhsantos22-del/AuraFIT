@@ -1,0 +1,571 @@
+/* =========================================================
+   RESET E VARIÁVEIS GERAIS - PAINEL ADMIN AURAFIT
+========================================================= */
+:root {
+    --verde-principal: #175936;
+    --verde-escuro: #0f3f26;
+    --verde-neon: #5ad439;
+    --fundo-pagina: #f4f7f5;
+    --branco: #ffffff;
+    --texto-titulo: #1e293b;
+    --texto-suave: #64748b;
+    --borda: #e2e8f0;
+    --vermelho: #dc2626;
+    --amarelo: #d97706;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    background-color: var(--fundo-pagina);
+    color: var(--texto-titulo);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================================
+   TOPBAR / NAVEGAÇÃO SUPERIOR
+========================================================= */
+.topbar {
+    background-color: var(--verde-principal);
+    height: 76px;
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+}
+
+.logo-text img {
+    width: 150px;
+    height: auto;
+    display: block;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+}
+
+.nav-menu a {
+    color: #e2e8f0;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.2s;
+    padding-bottom: 4px;
+}
+
+.nav-menu a:hover,
+.nav-menu a.ativo {
+    color: var(--verde-neon);
+    border-bottom: 2px solid var(--verde-neon);
+}
+
+.user-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.btn-site {
+    background-color: var(--branco);
+    color: var(--verde-principal);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 5px;
+    transition: 0.2s;
+}
+
+.btn-site:hover {
+    background-color: var(--verde-neon);
+    color: var(--verde-escuro);
+}
+
+.btn-sair {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--branco);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 5px;
+    transition: 0.2s;
+}
+
+.btn-sair:hover {
+    background-color: var(--vermelho);
+    border-color: var(--vermelho);
+}
+
+/* =========================================================
+   CONTAINER E CABEÇALHO DA PÁGINA
+========================================================= */
+.main-container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 40px auto;
+    padding: 0 24px;
+    flex: 1;
+}
+
+.page-header {
+    background-color: var(--branco);
+    padding: 24px 28px;
+    border-radius: 10px;
+    border: 1px solid var(--borda);
+    border-left: 6px solid var(--verde-principal);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.page-header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--verde-principal);
+}
+
+.page-header p {
+    font-size: 13.5px;
+    color: var(--texto-suave);
+    margin-top: 4px;
+}
+
+.btn-primario {
+    background-color: var(--verde-principal);
+    color: var(--branco);
+    border: none;
+    padding: 11px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.btn-primario:hover {
+    background-color: var(--verde-escuro);
+}
+
+/* =========================================================
+   CARDS DE RESUMO (KPIs)
+========================================================= */
+.resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.resumo-card {
+    background: var(--branco);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--borda);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.resumo-card span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+}
+
+.resumo-card strong {
+    display: block;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--verde-principal);
+    margin-top: 6px;
+}
+
+/* =========================================================
+   CARD DA TABELA, TOOLBAR E FILTROS
+========================================================= */
+.card-tabela {
+    background-color: var(--branco);
+    border-radius: 10px;
+    border: 1px solid var(--borda);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    overflow-x: auto;
+}
+
+.toolbar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--borda);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.toolbar input {
+    width: 100%;
+    max-width: 340px;
+    padding: 9px 14px;
+    border: 1px solid var(--borda);
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.toolbar input:focus {
+    border-color: var(--verde-principal);
+}
+
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-filtro {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--borda);
+    background: var(--fundo-pagina);
+    color: var(--texto-titulo);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-filtro.ativo,
+.btn-filtro:hover {
+    background: var(--verde-principal);
+    color: var(--branco);
+    border-color: var(--verde-principal);
+}
+
+/* =========================================================
+   TABELA DE DADOS
+========================================================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th {
+    background-color: #f8fafc;
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    border-bottom: 1px solid var(--borda);
+}
+
+td {
+    padding: 16px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--borda);
+    vertical-align: middle;
+}
+
+tr:hover {
+    background-color: #f9fbf9;
+}
+
+/* =========================================================
+   STATUS E BADGES
+========================================================= */
+.status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-confirmada,
+.badge-ativa {
+    background-color: #dcfce7;
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-pendente {
+    background-color: #fef3c7;
+    color: var(--amarelo);
+}
+
+.status-cancelada {
+    background-color: #fee2e2;
+    color: var(--vermelho);
+}
+
+.badge-admin {
+    background: #ecfdf5;
+    color: var(--verde-principal);
+    border: 1px solid #bbf7d0;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge-operador {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   AÇÕES NA TABELA
+========================================================= */
+.acoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-acao {
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.btn-editar {
+    background-color: #fef3c7;
+    color: var(--amarelo);
+}
+
+.btn-editar:hover {
+    background-color: #fde68a;
+}
+
+.btn-excluir {
+    background-color: #fee2e2;
+    color: var(--vermelho);
+}
+
+.btn-excluir:hover {
+    background-color: #fecaca;
+}
+
+.btn-confirmar {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+/* =========================================================
+   PAGINAÇÃO (NOVO COMPONENTE PADRONIZADO)
+========================================================= */
+.paginacao {
+    padding: 16px 20px;
+    background-color: #f8fafc;
+    border-top: 1px solid var(--borda);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.paginacao-info {
+    font-size: 13px;
+    color: var(--texto-suave);
+}
+
+.paginacao-info strong {
+    color: var(--verde-principal);
+    font-weight: 800;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-secundario {
+    background-color: var(--branco);
+    color: var(--verde-principal);
+    border: 1px solid var(--borda);
+}
+
+.btn-secundario:hover {
+    background-color: var(--verde-principal);
+    color: var(--branco);
+    border-color: var(--verde-principal);
+}
+
+/* =========================================================
+   MODAL DE CADASTRO / EDIÇÃO
+========================================================= */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+}
+
+.modal-overlay.aberto {
+    display: flex;
+}
+
+.modal-box {
+    background: var(--branco);
+    width: 100%;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 10px;
+    padding: 28px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--verde-principal);
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--texto-suave);
+}
+
+.close-modal:hover {
+    color: var(--vermelho);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--texto-titulo);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--borda);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--texto-titulo);
+    background-color: var(--branco);
+    outline: none;
+    transition: 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--verde-principal);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancelar {
+    background: #e2e8f0;
+    color: var(--texto-titulo);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-cancelar:hover {
+    background: #cbd5e1;
+}
+
+/* =========================================================
+   RODAPÉ E RESPONSIVIDADE
+========================================================= */
+.footer {
+    background-color: var(--branco);
+    border-top: 1px solid var(--borda);
+    text-align: center;
+    padding: 18px;
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-top: auto;
+}
+
+@media (max-width: 820px) {
+    .nav-menu {
+        display: none;
+    }
+
+    .paginacao {
+        justify-content: center;
+    }
+}

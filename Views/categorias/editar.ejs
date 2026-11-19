@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Categoria | AuraFit</title>
+  <link rel="stylesheet" href="/css/estilo-dash.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <a href="/admin" class="logo-text">
+       <img src="/img/landing/logo.png" alt="AuraFit Logo">
+    </a>
+
+    <ul class="nav-menu">
+      <li><a href="/admin">Painel</a></li>
+      <li><a href="/produtos">Produtos</a></li>
+      <li><a href="/categorias" class="ativo">Categorias</a></li>
+      <li><a href="/usuarios">Usuários</a></li>
+      <li><a href="/vendas">Vendas</a></li>
+    </ul>
+
+    <div class="user-nav">
+      <a href="/" class="btn-site">Ver Site</a>
+      <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="page-header">
+      <div>
+        <h1>Editar Categoria</h1>
+        <p>Atualize as informações da modalidade <strong><%= categoria.nome %></strong>.</p>
+      </div>
+      <a href="/categorias" class="btn-cancelar" style="text-decoration: none;">← Voltar</a>
+    </section>
+
+    <section class="card-tabela" style="padding: 28px;">
+      <form action="/categorias/editar/<%= categoria.id %>" method="POST">
+        <div class="form-group">
+          <label for="nome">Nome da Modalidade</label>
+          <input type="text" id="nome" name="nome" value="<%= categoria.nome %>" required maxlength="80" minlength="2" autofocus>
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="descricao">Descrição</label>
+          <textarea id="descricao" name="descricao" rows="4" maxlength="255"><%= categoria.descricao || '' %></textarea>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 24px;">
+          <a href="/categorias" class="btn-cancelar" style="text-decoration: none;">Cancelar</a>
+          <button type="submit" class="btn-primario">Salvar Alterações</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
+
+</body>
+</html>

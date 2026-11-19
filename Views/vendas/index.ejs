@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Vendas | AuraFit</title>
+  <link rel="stylesheet" href="/css/estilo-dash.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a href="/admin" class="logo-text">
+      <img src="/img/landing/logo.png" alt="AuraFit Logo">
+    </a>
+
+    <ul class="nav-menu">
+      <li><a href="/admin">Painel</a></li>
+      <li><a href="/produtos">Produtos</a></li>
+      <li><a href="/categorias">Categorias</a></li>
+      <li><a href="/usuarios">Usuários</a></li>
+      <li><a href="/vendas" class="ativo">Vendas</a></li>
+      <li><a href="/itens_venda">Itens Venda</a></li>
+    </ul>
+
+    <div class="user-nav">
+      <a href="/" class="btn-site">Ver Site</a>
+      <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="page-header">
+      <div>
+        <h1>Gestão de Vendas</h1>
+        <p>Acompanhe os pedidos realizados na loja e o faturamento da plataforma AuraFit.</p>
+      </div>
+      <button type="button" class="btn-primario" onclick="abrirModal()">+ Nova Venda</button>
+    </section>
+
+    <% 
+      const listaVendas = typeof vendas !== 'undefined' ? vendas : [];
+      const listaUsuarios = typeof usuarios !== 'undefined' ? usuarios : [];
+      const listaProdutos = typeof produtos !== 'undefined' ? produtos : [];
+
+      const paginaAtual = typeof pagina !== 'undefined' ? Number(pagina) : 1;
+      const totalPaginasAtual = typeof totalPaginas !== 'undefined' ? Number(totalPaginas) : 1;
+      const buscaAtual = typeof busca !== 'undefined' ? busca : '';
+      const ordemAtual = typeof ordem !== 'undefined' ? ordem : '';
+
+      const totalVendas = listaVendas.length;
+      const concluidas = listaVendas.filter(v => (v.status || '').toLowerCase() === 'concluida').length;
+      const faturamentoTotal = listaVendas
+        .filter(v => (v.status || '').toLowerCase() !== 'cancelada')
+        .reduce((acc, v) => acc + Number(v.valor_total || 0), 0);
+    %>
+
+    <section class="resumo-grid">
+      <div class="resumo-card">
+        <span>Total de Pedidos</span>
+        <strong><%= totalVendas %></strong>
+      </div>
+      <div class="resumo-card">
+        <span>Vendas Concluídas</span>
+        <strong><%= concluidas %></strong>
+      </div>
+      <div class="resumo-card">
+        <span>Faturamento Total</span>
+        <strong>
+          R$ <%= faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+        </strong>
+      </div>
+    </section>
+
+    <section class="card-tabela">
+      <div class="toolbar">
+        <input type="text" id="buscaVenda" value="<%= buscaAtual %>" placeholder="Buscar por cliente, e-mail ou nº do pedido..." onkeyup="filtrarVendas()">
+        <div class="filtros">
+          <button type="button" class="btn-filtro ativo" onclick="mudarStatus('todos', this)">Todas</button>
+          <button type="button" class="btn-filtro" onclick="mudarStatus('concluida', this)">Concluídas</button>
+          <button type="button" class="btn-filtro" onclick="mudarStatus('pendente', this)">Pendentes</button>
+          <button type="button" class="btn-filtro" onclick="mudarStatus('cancelada', this)">Canceladas</button>
+        </div>
+      </div>
+
+      <table id="tabelaVendas">
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Data da Venda</th>
+            <th>Valor Total</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (listaVendas.length > 0) { %>
+            <% listaVendas.forEach(venda => { %>
+              <% 
+                const statusNorm = (venda.status || 'concluida').toLowerCase();
+                let statusClass = 'status-pendente';
+                let statusLabel = 'Pendente';
+
+                if (statusNorm === 'concluida') {
+                  statusClass = 'status-confirmada';
+                  statusLabel = 'Concluída';
+                } else if (statusNorm === 'cancelada') {
+                  statusClass = 'status-cancelada';
+                  statusLabel = 'Cancelada';
+                }
+
+                const dataFormatada = venda.data_venda 
+                  ? new Date(venda.data_venda).toLocaleDateString('pt-BR') 
+                  : '-';
+              %>
+              <tr data-status="<%= statusNorm %>">
+                <td><strong>#<%= venda.id %></strong></td>
+                <td>
+                  <strong><%= venda.cliente_nome %></strong><br>
+                  <small style="color: #64748b;"><%= venda.cliente_email || '' %></small>
+                </td>
+                <td><%= dataFormatada %></td>
+                <td>
+                  <strong style="color: #175936;">
+                    R$ <%= Number(venda.valor_total).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </strong>
+                </td>
+                <td>
+                  <span class="status <%= statusClass %>"><%= statusLabel %></span>
+                </td>
+                <td>
+                  <div class="acoes">
+                    <button 
+                      type="button" 
+                      class="btn-acao btn-editar" 
+                      onclick="editarVenda('<%= venda.id %>', '<%= venda.usuario_id %>', '<%= venda.valor_total %>', '<%= statusNorm %>')">
+                      Editar
+                    </button>
+                    <form action="/vendas/excluir/<%= venda.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Deseja realmente excluir esta venda?');">
+                      <button type="submit" class="btn-acao btn-excluir">Excluir</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 24px;">Nenhuma venda registrada no sistema ainda.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <div class="paginacao">
+        <% if (paginaAtual > 1) { %>
+          <a class="btn btn-secundario"
+            href="/vendas?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual - 1 %>">
+            Anterior
+          </a>
+        <% } %>
+
+        <span class="paginacao-info">
+          Página <strong><%= paginaAtual %></strong>
+          de <strong><%= totalPaginasAtual %></strong>
+        </span>
+
+        <% if (paginaAtual < totalPaginasAtual) { %>
+          <a class="btn btn-secundario"
+            href="/vendas?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual + 1 %>">
+            Próxima
+          </a>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL CADASTRAR / EDITAR VENDA (NA PRÓPRIA PÁGINA) -->
+  <div class="modal-overlay" id="modalVenda">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="tituloModal">Nova Venda</h2>
+        <button type="button" class="close-modal" onclick="fecharModal()">&times;</button>
+      </div>
+
+      <form id="formVenda" action="/vendas/novo" method="POST">
+        <div class="form-group">
+          <label for="usuario_id">Cliente</label>
+          <select id="usuario_id" name="usuario_id" required>
+            <option value="">Selecione um cliente...</option>
+            <% listaUsuarios.forEach(u => { %>
+              <option value="<%= u.id %>"><%= u.nome %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Campos exclusivos para Nova Venda -->
+        <div id="camposNovaVenda">
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="produto_id">Produto / Equipamento</label>
+            <select id="produto_id" name="produto_id" onchange="atualizarTotal()">
+              <option value="" data-preco="0">Selecione um produto...</option>
+              <% listaProdutos.forEach(p => { %>
+                <option value="<%= p.id %>" data-preco="<%= p.preco %>">
+                  <%= p.nome %> — R$ <%= Number(p.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %> (Estoque: <%= p.estoque_atual %>)
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="quantidade">Quantidade</label>
+            <input type="number" id="quantidade" name="quantidade" min="1" value="1" oninput="atualizarTotal()">
+          </div>
+        </div>
+
+        <!-- Campo exclusivo para Edição de Valor Total -->
+        <div id="campoEditarValor" class="form-group" style="display: none; margin-top: 12px;">
+          <label for="valor_total">Valor Total (R$)</label>
+          <input type="number" id="valor_total" name="valor_total" step="0.01" min="0">
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="status">Status do Pedido</label>
+          <select id="status" name="status">
+            <option value="concluida">Concluída (Pago)</option>
+            <option value="pendente">Pendente</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-primario">Salvar Venda</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
+
+  <script>
+    let statusAtual = 'todos';
+
+    function abrirModal() {
+      document.getElementById('tituloModal').innerText = 'Nova Venda';
+      document.getElementById('formVenda').action = '/vendas/novo';
+      document.getElementById('formVenda').reset();
+
+      document.getElementById('camposNovaVenda').style.display = 'block';
+      document.getElementById('produto_id').required = true;
+      document.getElementById('quantidade').required = true;
+
+      document.getElementById('campoEditarValor').style.display = 'none';
+      document.getElementById('valor_total').required = false;
+
+      document.getElementById('modalVenda').classList.add('aberto');
+    }
+
+    function editarVenda(id, usuarioId, valorTotal, status) {
+      document.getElementById('tituloModal').innerText = 'Editar Venda #' + id;
+      document.getElementById('formVenda').action = '/vendas/editar/' + id;
+
+      document.getElementById('usuario_id').value = usuarioId;
+      document.getElementById('valor_total').value = valorTotal;
+      document.getElementById('status').value = status;
+
+      document.getElementById('camposNovaVenda').style.display = 'none';
+      document.getElementById('produto_id').required = false;
+      document.getElementById('quantidade').required = false;
+
+      document.getElementById('campoEditarValor').style.display = 'block';
+      document.getElementById('valor_total').required = true;
+
+      document.getElementById('modalVenda').classList.add('aberto');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalVenda').classList.remove('aberto');
+    }
+
+    function mudarStatus(st, btn) {
+      statusAtual = st;
+      document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      filtrarVendas();
+    }
+
+    function filtrarVendas() {
+      const termo = document.getElementById('buscaVenda').value.toLowerCase();
+      document.querySelectorAll('#tabelaVendas tbody tr').forEach(tr => {
+        const st = tr.getAttribute('data-status');
+        if (!st) return;
+        const bateStatus = (statusAtual === 'todos' || st === statusAtual);
+        const bateTexto = tr.innerText.toLowerCase().includes(termo);
+        tr.style.display = (bateStatus && bateTexto) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+
+</html>

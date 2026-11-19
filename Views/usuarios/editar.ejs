@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Usuário | AuraFit</title>
+  <link rel="stylesheet" href="/css/estilo-dash.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a href="/admin" class="logo-text">
+      <img src="/img/landing/logo.png" alt="AuraFit Logo">
+    </a>
+
+    <ul class="nav-menu">
+      <li><a href="/admin">Painel</a></li>
+      <li><a href="/produtos">Produtos</a></li>
+      <li><a href="/categorias">Categorias</a></li>
+      <li><a href="/usuarios" class="ativo">Usuários</a></li>
+      <li><a href="/vendas">Vendas</a></li>
+      <li><a href="/itens_venda">Itens Venda</a></li>
+    </ul>
+
+    <div class="user-nav">
+      <a href="/" class="btn-site">Ver Site</a>
+      <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="page-header">
+      <div>
+        <h1>Editar Usuário</h1>
+        <p>Atualize os dados e permissões de <strong><%= usuarioEdit.nome %></strong>.</p>
+      </div>
+      <a href="/usuarios" class="btn-cancelar" style="text-decoration: none;">← Voltar</a>
+    </section>
+
+    <section class="card-tabela" style="padding: 28px;">
+      <form action="/usuarios/editar/<%= usuarioEdit.id %>" method="POST">
+        <div class="form-group">
+          <label for="nome">Nome Completo</label>
+          <input type="text" id="nome" name="nome" value="<%= usuarioEdit.nome %>" required maxlength="100" minlength="3" autofocus>
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="email">E-mail de Acesso</label>
+          <input type="email" id="email" name="email" value="<%= usuarioEdit.email %>" required maxlength="120">
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="senha">Nova Senha <small style="color: #64748b; font-weight: normal;">(deixe em branco para manter a atual)</small></label>
+          <input type="password" id="senha" name="senha" placeholder="••••••••">
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="perfil">Tipo de Usuário</label>
+          <select id="perfil" name="perfil" required>
+            <option value="cliente" <%= (usuarioEdit.perfil || usuarioEdit.tipo) === 'cliente' ? 'selected' : '' %>>Cliente</option>
+            <option value="admin" <%= (usuarioEdit.perfil || usuarioEdit.tipo) === 'admin' ? 'selected' : '' %>>Admin</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="situacao">Status da Conta</label>
+          <select id="situacao" name="situacao">
+            <option value="1" <%= Number(usuarioEdit.situacao) === 1 ? 'selected' : '' %>>Ativo</option>
+            <option value="0" <%= Number(usuarioEdit.situacao) === 0 ? 'selected' : '' %>>Inativo</option>
+          </select>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 24px;">
+          <a href="/usuarios" class="btn-cancelar" style="text-decoration: none;">Cancelar</a>
+          <button type="submit" class="btn-primario">Salvar Alterações</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
+
+</body>
+
+</html>

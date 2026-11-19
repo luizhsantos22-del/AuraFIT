@@ -5,15 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraFit - Equipamentos de Combate e Treino</title>
-    <link rel="stylesheet" href="css/estilos-lp.css">
+    <link rel="stylesheet" href="/css/estilos-lp.css">
 </head>
 
 <body>
     <!-- CABEÇALHO / NAVBAR -->
     <header class="navbar">
-        <a href="#" class="logo-text">
-                <img src="img/landing/logo.png" alt="AuraFit Logo">
-            </a>
+        <a href="/" class="logo-text">
+            <img src="/img/landing/logo.png" alt="AuraFit Logo">
+        </a>
         <nav class="nav-links">
             <a href="/" class="active">Início</a>
             <a href="/judo">Judô</a>
@@ -26,18 +26,65 @@
         </div>
     </header>
 
+    <%
+        const buscaAtual = typeof termoBusca !== 'undefined' ? termoBusca : '';
+        const produtosList = typeof listaProdutos !== 'undefined' ? listaProdutos : [];
+    %>
+
     <main>
         <!-- HERO / BUSCA -->
-        <section class="hero" id="inicio">
+        <section class="hero" id="inicio" style="background-image: url('/IMG/Landing/hero-judo.jpg');">
             <div class="hero-overlay">
-                <div class="container hero-conteudo">
-                    <div class="busca-container">
+                <div class="container">
+                    <form action="/" method="GET" class="busca-container">
                         <label for="campo-busca">Buscar</label>
-                        <input type="text" id="campo-busca" placeholder="Ex: Judo kimono">
-                    </div>
+                        <input 
+                            type="text" 
+                            id="campo-busca" 
+                            name="busca" 
+                            placeholder="Ex: Judo, Kimono, Muay Thai, K..."
+                            value="<%= buscaAtual %>"
+                        >
+                        <button type="submit" class="btn-admin">PESQUISAR</button>
+                    </form>
                 </div>
             </div>
         </section>
+
+        <!-- RESULTADOS DA BUSCA -->
+        <% if (buscaAtual !== '') { %>
+            <section class="container" style="margin-top: 30px;">
+                <div class="category-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <h2>RESULTADOS PARA "<%= buscaAtual.toUpperCase() %>" (<%= produtosList.length %>)</h2>
+                    <a href="/" class="btn-admin">LIMPAR BUSCA</a>
+                </div>
+
+                <div class="products-grid">
+                    <% if (produtosList.length > 0) { %>
+                        <% produtosList.forEach(produto => { %>
+                            <div class="product-card">
+                                <div class="img-box">
+                                    <img src="/IMG/upload/<%= produto.imagem_url || 'default.jpg' %>" alt="<%= produto.nome %>">
+                                </div>
+                                <div class="card-content">
+                                    <% if (produto.categoria_nome) { %>
+                                        <small style="color: #0d5c38; font-weight: bold; text-transform: uppercase; font-size: 11px;">
+                                            <%= produto.categoria_nome %>
+                                        </small>
+                                    <% } %>
+                                    <h3 class="product-title"><%= produto.nome %></h3>
+                                    <p class="product-price">
+                                        R$ <%= Number(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                                    </p>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="no-products">Nenhum produto encontrado para "<%= buscaAtual %>".</p>
+                    <% } %>
+                </div>
+            </section>
+        <% } %>
 
         <!-- SEÇÃO MOTIVACIONAL / RINGUE -->
         <section class="motivacional">

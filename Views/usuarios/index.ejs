@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Usuários | AuraFit</title>
+  <link rel="stylesheet" href="/css/estilo-dash.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a href="/admin" class="logo-text">
+      <img src="/img/landing/logo.png" alt="AuraFit Logo">
+    </a>
+
+    <ul class="nav-menu">
+      <li><a href="/admin">Painel</a></li>
+      <li><a href="/produtos">Produtos</a></li>
+      <li><a href="/categorias">Categorias</a></li>
+      <li><a href="/usuarios" class="ativo">Usuários</a></li>
+      <li><a href="/vendas">Vendas</a></li>
+      <li><a href="/itens_venda">Itens Venda</a></li>
+    </ul>
+
+    <div class="user-nav">
+      <a href="/" class="btn-site">Ver Site</a>
+      <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="page-header">
+      <div>
+        <h1>Gestão de Usuários</h1>
+        <p>Gerencie os administradores e clientes cadastrados na plataforma AuraFit.</p>
+      </div>
+      <button type="button" class="btn-primario" onclick="abrirModal()">+ Novo Usuário</button>
+    </section>
+
+    <% 
+      const listaUsuarios = typeof usuarios !== 'undefined' ? usuarios : [];
+
+      const paginaAtual = typeof pagina !== 'undefined' ? Number(pagina) : 1;
+      const totalPaginasAtual = typeof totalPaginas !== 'undefined' ? Number(totalPaginas) : 1;
+      const buscaAtual = typeof busca !== 'undefined' ? busca : '';
+      const ordemAtual = typeof ordem !== 'undefined' ? ordem : '';
+
+      const totalUsuarios = listaUsuarios.length;
+      const totalAdmins = listaUsuarios.filter(u => (u.perfil || u.tipo || '').toLowerCase() === 'admin').length;
+      const totalClientes = listaUsuarios.filter(u => (u.perfil || u.tipo || 'cliente').toLowerCase() === 'cliente').length;
+    %>
+
+    <section class="resumo-grid">
+      <div class="resumo-card">
+        <span>Total de Usuários</span>
+        <strong><%= totalUsuarios %></strong>
+      </div>
+      <div class="resumo-card">
+        <span>Administradores</span>
+        <strong><%= totalAdmins %></strong>
+      </div>
+      <div class="resumo-card">
+        <span>Clientes</span>
+        <strong><%= totalClientes %></strong>
+      </div>
+    </section>
+
+    <section class="card-tabela">
+      <div class="toolbar">
+        <input type="text" id="buscaUsuario" value="<%= buscaAtual %>" placeholder="Buscar por nome, e-mail ou ID..." onkeyup="filtrarUsuarios()">
+        <div class="filtros">
+          <button type="button" class="btn-filtro ativo" onclick="mudarPerfil('todos', this)">Todos</button>
+          <button type="button" class="btn-filtro" onclick="mudarPerfil('admin', this)">Administradores</button>
+          <button type="button" class="btn-filtro" onclick="mudarPerfil('cliente', this)">Clientes</button>
+        </div>
+      </div>
+
+      <table id="tabelaUsuarios">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuário</th>
+            <th>Data de Cadastro</th>
+            <th>Tipo de Acesso</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (listaUsuarios.length > 0) { %>
+            <% listaUsuarios.forEach(u => { %>
+              <% 
+                const tipoNorm = (u.perfil || u.tipo || 'cliente').toLowerCase();
+                const tipoLabel = tipoNorm === 'admin' ? 'Admin' : 'Cliente';
+                const isAtivo = u.situacao === undefined || Number(u.situacao) === 1;
+
+                const dataFormatada = u.criado_em 
+                  ? new Date(u.criado_em).toLocaleDateString('pt-BR') 
+                  : '-';
+              %>
+              <tr data-perfil="<%= tipoNorm %>">
+                <td><strong>#<%= u.id %></strong></td>
+                <td>
+                  <strong><%= u.nome %></strong><br>
+                  <small style="color: #64748b;"><%= u.email %></small>
+                </td>
+                <td><%= dataFormatada %></td>
+                <td>
+                  <span class="<%= tipoNorm === 'admin' ? 'badge-admin' : 'badge-operador' %>">
+                    <%= tipoLabel %>
+                  </span>
+                </td>
+                <td>
+                  <span class="status <%= isAtivo ? 'status-confirmada' : 'status-cancelada' %>">
+                    <%= isAtivo ? 'Ativo' : 'Inativo' %>
+                  </span>
+                </td>
+                <td>
+                  <div class="acoes">
+                    <button 
+                      type="button" 
+                      class="btn-acao btn-editar" 
+                      onclick="editarUsuario('<%= u.id %>', '<%= u.nome %>', '<%= u.email %>', '<%= tipoNorm %>', '<%= isAtivo ? 1 : 0 %>')">
+                      Editar
+                    </button>
+                    <form action="/usuarios/excluir/<%= u.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Deseja realmente excluir este usuário?');">
+                      <button type="submit" class="btn-acao btn-excluir">Excluir</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 24px;">Nenhum usuário cadastrado no sistema ainda.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <div class="paginacao">
+        <% if (paginaAtual > 1) { %>
+          <a class="btn btn-secundario"
+            href="/usuarios?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual - 1 %>">
+            Anterior
+          </a>
+        <% } %>
+
+        <span class="paginacao-info">
+          Página <strong><%= paginaAtual %></strong>
+          de <strong><%= totalPaginasAtual %></strong>
+        </span>
+
+        <% if (paginaAtual < totalPaginasAtual) { %>
+          <a class="btn btn-secundario"
+            href="/usuarios?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual + 1 %>">
+            Próxima
+          </a>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL CADASTRAR / EDITAR USUÁRIO -->
+  <div class="modal-overlay" id="modalUsuario">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="tituloModal">Novo Usuário</h2>
+        <button type="button" class="close-modal" onclick="fecharModal()">&times;</button>
+      </div>
+
+      <form id="formUsuario" action="/usuarios/novo" method="POST">
+        <div class="form-group">
+          <label for="nome">Nome Completo</label>
+          <input type="text" id="nome" name="nome" placeholder="Ex: Carlos Silva" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="email">E-mail de Acesso</label>
+          <input type="email" id="email" name="email" placeholder="carlos@aurafit.com.br" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="senha" id="labelSenha">Senha</label>
+          <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="perfil">Tipo de Usuário</label>
+          <select id="perfil" name="perfil" required>
+            <option value="cliente">Cliente</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="situacao">Status da Conta</label>
+          <select id="situacao" name="situacao">
+            <option value="1">Ativo</option>
+            <option value="0">Inativo</option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-primario">Salvar Usuário</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
+
+  <script>
+    let perfilAtual = 'todos';
+
+    function abrirModal() {
+      document.getElementById('tituloModal').innerText = 'Novo Usuário';
+      document.getElementById('formUsuario').action = '/usuarios/novo';
+      document.getElementById('formUsuario').reset();
+
+      document.getElementById('labelSenha').innerText = 'Senha';
+      document.getElementById('senha').required = true;
+      document.getElementById('perfil').value = 'cliente';
+      document.getElementById('situacao').value = '1';
+
+      document.getElementById('modalUsuario').classList.add('aberto');
+    }
+
+    function editarUsuario(id, nome, email, tipo, situacao) {
+      document.getElementById('tituloModal').innerText = 'Editar Usuário #' + id;
+      document.getElementById('formUsuario').action = '/usuarios/editar/' + id;
+
+      document.getElementById('nome').value = nome;
+      document.getElementById('email').value = email;
+      document.getElementById('perfil').value = tipo || 'cliente';
+      document.getElementById('situacao').value = situacao;
+
+      document.getElementById('labelSenha').innerText = 'Nova Senha (deixe em branco para manter)';
+      document.getElementById('senha').value = '';
+      document.getElementById('senha').required = false;
+
+      document.getElementById('modalUsuario').classList.add('aberto');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalUsuario').classList.remove('aberto');
+    }
+
+    function mudarPerfil(perfil, btn) {
+      perfilAtual = perfil;
+      document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      filtrarUsuarios();
+    }
+
+    function filtrarUsuarios() {
+      const termo = document.getElementById('buscaUsuario').value.toLowerCase();
+      document.querySelectorAll('#tabelaUsuarios tbody tr').forEach(tr => {
+        const pf = tr.getAttribute('data-perfil');
+        if (!pf) return;
+        const batePerfil = (perfilAtual === 'todos' || pf === perfilAtual);
+        const bateTexto = tr.innerText.toLowerCase().includes(termo);
+        tr.style.display = (batePerfil && bateTexto) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+
+</html>

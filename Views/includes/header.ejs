@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,
+     initial-scale=1.0">
+    <title>
+        Conecta Eventos - <%=titulo%>
+    </title>
+    <link rel="stylesheet" href="/CSS/estilos-adm.css">
+</head>
+
+<body>
+    <header class="admin-cabecalho">
+        <div class="admin-container">
+            <div class="admin-cabecalho-superior">
+                <a class="admin-logo" href="/dashboard">
+                    <img src="/img/landing/logo.png" alt="Conecta Eventos">
+                </a>
+                <% if (typeof usuario !=='undefined' && usuario && usuario.nome) { %>
+                    <div class="admin-usuario">Bem-vindo,
+                        <strong>
+                            <%= usuario.nome %>
+                        </strong>
+                    </div>
+                    <% } %>
+            </div>
+            <div class="admin-cabecalho-inferior admin-titulo">
+                <%= titulo %>
+                    </h2>
+                    <nav class="admin-menu" aria-label="Navegaçao administrativa">
+                        <a href="/dashboard">Dashboard</a>
+                        <a href="/categorias">Categorias</a>
+                        <a href="/produtos">Produtos</a>
+                        <a href="/usuarios">Usuários</a>
+                        <a href="/vendas">Vendas</a>
+                        <a href="/itens_venda">Itens Venda</a>
+                        <a href="/logout">Sair</a>
+                    </nav>
+            </div>
+        </div>
+    </header>
+    <li><a href="/admin">Painel</a></li>
+      <li><a href="/admin/produtos">Produtos</a></li>
+      <li><a href="/admin/categorias">Categorias</a></li>
+      <li><a href="/admin/usuarios">Usuários</a></li>
+      <li><a href="/admin/vendas" class="ativo">Vendas</a></li>

@@ -37,37 +37,73 @@ function exigirLogin(req, res, next) {
 // ROTAS PÚBLICAS E LANDING PAGE
 // ============================================
 
-// Rota Inicial (Vitrine do E-commerce)
-app.get("/", async (req, res) => {
+// Rota Inicial (Vitrine do E-commerce com Busca)
+app.get('/', async (req, res) => {
     try {
-        const resultado = await BD.query(`
-            SELECT 
-                p.id,
-                p.nome,
-                p.descricao,
-                p.preco,
-                p.estoque_atual,
-                p.imagem_url,
-                c.nome AS nome_categoria
-            FROM produtos p
-            INNER JOIN categorias c ON p.categoria_id = c.id
-            ORDER BY p.id ASC
-        `);
-        const listaProdutos = resultado.rows;
-        res.render("landing/index", {
+        const termoBusca = (req.query.busca || '').trim();
+        let listaProdutos = [];
+
+        if (termoBusca !== '') {
+            // Normaliza caso o usuário digite sem acento (ex: "judo")
+            const termoNormalizado = termoBusca
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+
+            const sql = `
+                SELECT 
+                    p.id,
+                    p.nome,
+                    p.descricao,
+                    p.preco,
+                    p.imagem_url,
+                    c.nome AS categoria_nome
+                FROM produtos p
+                LEFT JOIN categorias c ON p.categoria_id = c.id
+                WHERE 
+                    p.nome ILIKE $1
+                    OR c.nome ILIKE $1
+                    OR TRANSLATE(LOWER(p.nome), 'áàãâéêíóôõúüç', 'aaaaeeiooouuc') ILIKE $2
+                    OR TRANSLATE(LOWER(c.nome), 'áàãâéêíóôõúüç', 'aaaaeeiooouuc') ILIKE $2
+                ORDER BY p.nome ASC
+            `;
+
+            const valores = [
+                `%${termoBusca}%`,
+                `%${termoNormalizado.toLowerCase()}%`
+            ];
+
+            const resultado = await BD.query(sql, valores);
+            listaProdutos = resultado.rows;
+        }
+
+        res.render('landing/index', {
+            termoBusca,
             listaProdutos
         });
     } catch (erro) {
-        console.log("Erro ao consultar produtos: " + erro);
-        res.render("landing/index", {
-            listaProdutos: []
-        });
+        console.error('Erro ao buscar produtos:', erro);
+        res.status(500).send('Erro interno ao realizar a busca.');
     }
 });
 
-// Vitrine de Judô
+// Vitrine de Judô (com Paginação)
 app.get("/judo", async (req, res) => {
     try {
+        const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
+        const limite = 8;
+        const offset = (pagina - 1) * limite;
+        const busca = req.query.busca || '';
+        const ordem = req.query.ordem || '';
+
+        const totalRes = await BD.query(`
+            SELECT COUNT(*) AS total
+            FROM produtos p
+            INNER JOIN categorias c ON p.categoria_id = c.id
+            WHERE LOWER(c.nome) LIKE '%judô%' OR LOWER(c.nome) LIKE '%judo%' OR p.categoria_id = 1
+        `);
+        const totalProdutos = parseInt(totalRes.rows[0].total, 10);
+        const totalPaginas = Math.max(1, Math.ceil(totalProdutos / limite));
+
         const resultado = await BD.query(`
             SELECT 
                 p.id, 
@@ -79,28 +115,54 @@ app.get("/judo", async (req, res) => {
                 p.imagem_url
             FROM produtos p
             INNER JOIN categorias c ON p.categoria_id = c.id
-            WHERE LOWER(c.nome) LIKE '%judô%' OR LOWER(c.nome) LIKE '%judo%' OR p.categoria_id = 1;
-        `);
+            WHERE LOWER(c.nome) LIKE '%judô%' OR LOWER(c.nome) LIKE '%judo%' OR p.categoria_id = 1
+            ORDER BY p.id ASC
+            LIMIT $1 OFFSET $2
+        `, [limite, offset]);
+
         const produtosJudo = resultado.rows;
         
         res.render("landing/judo", {
             produtos: produtosJudo,
             produtosJudo: produtosJudo,
-            totalProdutos: produtosJudo.length
+            totalProdutos,
+            pagina,
+            totalPaginas,
+            busca,
+            ordem
         });
     } catch (erro) {
         console.log("Erro no servidor: ", erro);
         res.status(500).render("landing/judo", {
             produtos: [],
             produtosJudo: [],
-            totalProdutos: 0
+            totalProdutos: 0,
+            pagina: 1,
+            totalPaginas: 1,
+            busca: '',
+            ordem: ''
         });
     }
 });
 
-// Vitrine de Muay Thai
+// Vitrine de Muay Thai (com Paginação)
 app.get("/muaythai", async (req, res) => {
     try {
+        const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
+        const limite = 8;
+        const offset = (pagina - 1) * limite;
+        const busca = req.query.busca || '';
+        const ordem = req.query.ordem || '';
+
+        const totalRes = await BD.query(`
+            SELECT COUNT(*) AS total
+            FROM produtos p
+            INNER JOIN categorias c ON p.categoria_id = c.id
+            WHERE LOWER(c.nome) LIKE '%muay thai%' OR LOWER(c.nome) LIKE '%muaythai%' OR p.categoria_id = 2
+        `);
+        const totalProdutos = parseInt(totalRes.rows[0].total, 10);
+        const totalPaginas = Math.max(1, Math.ceil(totalProdutos / limite));
+
         const resultado = await BD.query(`
             SELECT 
                 p.id, 
@@ -112,28 +174,54 @@ app.get("/muaythai", async (req, res) => {
                 p.imagem_url
             FROM produtos p
             INNER JOIN categorias c ON p.categoria_id = c.id
-            WHERE LOWER(c.nome) LIKE '%Muay Thai%' OR LOWER(c.nome) LIKE '%muaythai%' OR p.categoria_id = 2;
-        `);
+            WHERE LOWER(c.nome) LIKE '%muay thai%' OR LOWER(c.nome) LIKE '%muaythai%' OR p.categoria_id = 2
+            ORDER BY p.id ASC
+            LIMIT $1 OFFSET $2
+        `, [limite, offset]);
+
         const produtosMuay = resultado.rows;
         
         res.render("landing/muay-thai", {
             produtos: produtosMuay,
             produtosMuay: produtosMuay,
-            totalProdutos: produtosMuay.length
+            totalProdutos,
+            pagina,
+            totalPaginas,
+            busca,
+            ordem
         });
     } catch (erro) {
         console.log("Erro no servidor: ", erro);
         res.status(500).render("landing/muay-thai", {
             produtos: [],
             produtosMuay: [],
-            totalProdutos: 0
+            totalProdutos: 0,
+            pagina: 1,
+            totalPaginas: 1,
+            busca: '',
+            ordem: ''
         });
     }
 });
 
-// Vitrine de CrossFit
+// Vitrine de CrossFit (com Paginação)
 app.get("/crossfit", async (req, res) => {
     try {
+        const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
+        const limite = 8;
+        const offset = (pagina - 1) * limite;
+        const busca = req.query.busca || '';
+        const ordem = req.query.ordem || '';
+
+        const totalRes = await BD.query(`
+            SELECT COUNT(*) AS total
+            FROM produtos p
+            INNER JOIN categorias c ON p.categoria_id = c.id
+            WHERE LOWER(c.nome) LIKE '%crossfit%' OR p.categoria_id = 3
+        `);
+        const totalProdutos = parseInt(totalRes.rows[0].total, 10);
+        const totalPaginas = Math.max(1, Math.ceil(totalProdutos / limite));
+
         const resultado = await BD.query(`
             SELECT 
                 p.id, 
@@ -145,21 +233,32 @@ app.get("/crossfit", async (req, res) => {
                 p.imagem_url
             FROM produtos p
             INNER JOIN categorias c ON p.categoria_id = c.id
-            WHERE LOWER(c.nome) LIKE '%CrossFit%' OR LOWER(c.nome) LIKE '%crossfit%' OR p.categoria_id = 3;
-        `);
+            WHERE LOWER(c.nome) LIKE '%crossfit%' OR p.categoria_id = 3
+            ORDER BY p.id ASC
+            LIMIT $1 OFFSET $2
+        `, [limite, offset]);
+
         const produtosCross = resultado.rows;
         
         res.render("landing/crossfit", {
             produtos: produtosCross,
             produtosCross: produtosCross,
-            totalProdutos: produtosCross.length
+            totalProdutos,
+            pagina,
+            totalPaginas,
+            busca,
+            ordem
         });
     } catch (erro) {
         console.log("Erro no servidor: ", erro);
         res.status(500).render("landing/crossfit", {
             produtos: [],
             produtosCross: [],
-            totalProdutos: 0
+            totalProdutos: 0,
+            pagina: 1,
+            totalPaginas: 1,
+            busca: '',
+            ordem: ''
         });
     }
 });
@@ -170,9 +269,8 @@ app.get("/crossfit", async (req, res) => {
 
 // Rota de Cadastro de Conta (GET)
 app.get('/cadastro', (req, res) => {
-       res.render("cadastro")
+    res.render("cadastro");
 });
-
 
 // Rota de Cadastro de Conta (POST)
 app.post('/cadastro', async (req, res) => {
@@ -209,12 +307,7 @@ app.post('/cadastro', async (req, res) => {
 
 // Rota de Login (GET)
 app.get('/login', (req, res) => {
-    /*
-    if (req.session.usuario) {
-        return res.redirect(req.session.usuario.tipo === 'admin' ? '/admin' : '/');
-    }
-    res.render('login', { erro: null, sucesso: null });*/
-    res.render("login")
+    res.render("login");
 });
 
 // Rota de Login (POST)
@@ -269,34 +362,47 @@ app.get("/admin", exigirLogin, (req, res) => {
 // Dashboard de Vendas e Indicadores
 app.get('/dashboard', exigirLogin, async (req, res) => {
     try {
-        const totalProdutos = await BD.query(`SELECT count(*) as total FROM produtos`);
-        const totalClientes = await BD.query(`SELECT count(*) as total FROM usuarios WHERE tipo = 'cliente'`);
-        const totalVendas = await BD.query(`SELECT count(*) as total FROM vendas`);
-        const usuariosAtivos = await BD.query(`SELECT count(*) as total FROM usuarios WHERE situacao = 1`);
-
-        const vendasStatus = await BD.query(`
-            SELECT status, count(*) as total
-            FROM vendas
-            GROUP BY status
-            ORDER BY status
+        // 1. Busca os produtos com o nome da categoria para a tabela
+        const produtosRes = await BD.query(`
+            SELECT 
+                p.id, 
+                p.nome, 
+                p.descricao,
+                p.preco, 
+                p.estoque_atual, 
+                p.imagem_url, 
+                p.categoria_id,
+                c.nome AS categoria
+            FROM produtos p
+            INNER JOIN categorias c ON p.categoria_id = c.id
+            ORDER BY p.id ASC
         `);
 
-        const produtosCategoria = await BD.query(`
-            SELECT c.nome as categoria, count(p.id) as total
-            FROM categorias c
-            LEFT JOIN produtos p ON p.categoria_id = c.id
-            GROUP BY c.id, c.nome
-            ORDER BY c.nome
-        `);
+        // 2. Busca categorias para o <select> do modal de cadastro/edição
+        const categoriasRes = await BD.query(`SELECT * FROM categorias ORDER BY nome ASC`);
+
+        // 3. Busca métricas reais para os cards do topo
+        const totalProdutosRes = await BD.query(`SELECT count(*) as total FROM produtos`);
+        const vendasHojeRes = await BD.query(`SELECT count(*) as total FROM vendas WHERE DATE(data_venda) = CURRENT_DATE`);
+        const faturamentoRes = await BD.query(`SELECT COALESCE(SUM(valor_total), 0) as total FROM vendas WHERE status = 'concluida'`);
+        const estoqueBaixoRes = await BD.query(`SELECT count(*) as total FROM produtos WHERE estoque_atual <= 5`);
+
+        // Formata faturamento para R$
+        const faturamentoFormatado = Number(faturamentoRes.rows[0].total).toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
 
         res.render('dashboard', {
             usuario: req.session.usuario,
-            totalProdutos: totalProdutos.rows[0].total,
-            totalClientes: totalClientes.rows[0].total,
-            totalVendas: totalVendas.rows[0].total,
-            usuariosAtivos: usuariosAtivos.rows[0].total,
-            vendasStatus: vendasStatus.rows,
-            produtosCategoria: produtosCategoria.rows
+            produtos: produtosRes.rows,
+            categorias: categoriasRes.rows,
+            metricas: {
+                totalProdutos: totalProdutosRes.rows[0].total,
+                pedidosHoje: vendasHojeRes.rows[0].total,
+                faturamentoMes: faturamentoFormatado,
+                estoqueBaixo: estoqueBaixoRes.rows[0].total
+            }
         });
 
     } catch (erro) {
@@ -309,11 +415,11 @@ app.get('/dashboard', exigirLogin, async (req, res) => {
 // REGISTRO DOS MÓDULOS DE ROTAS
 // ============================================
 
-// Rotas - Produtos (substitui a eventosRoutes)
+// Rotas - Produtos
 const produtosRoutes = require('./routes/produtosRoutes');
 app.use('/produtos', exigirLogin, produtosRoutes);
 
-// Rotas - Clientes (substitui a participantesRoutes)
+// Rotas - Clientes
 const clientesRoutes = require('./routes/clientesRoutes');
 app.use('/clientes', exigirLogin, clientesRoutes);
 
@@ -321,13 +427,17 @@ app.use('/clientes', exigirLogin, clientesRoutes);
 const categoriasRoutes = require('./routes/categoriasRoutes');
 app.use('/categorias', exigirLogin, categoriasRoutes);
 
-// Rotas - Vendas (substitui a inscricaoRoutes)
+// Rotas - Vendas
 const vendasRoutes = require('./routes/vendasRoutes');
 app.use('/vendas', exigirLogin, vendasRoutes);
 
 // Rotas - Usuários (Administradores)
 const usuariosRoutes = require('./routes/usuariosRoutes');
 app.use('/usuarios', exigirLogin, usuariosRoutes);
+
+// Rotas - Itens Venda (Administradores)
+const itensVendaRoutes = require('./routes/itensVendaRoutes');
+app.use('/itens_venda', exigirLogin, itensVendaRoutes);
 
 //execução do servidor
 const porta = 3001;

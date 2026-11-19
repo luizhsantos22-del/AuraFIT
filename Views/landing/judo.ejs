@@ -10,9 +10,9 @@
 
     <!-- NAVBAR / CABEÇALHO DA AURAFIT -->
     <header class="navbar">
-        <a href="#" class="logo-text">
-                <img src="img/landing/logo.png" alt="AuraFit Logo">
-            </a>
+        <a href="/" class="logo-text">
+            <img src="img/landing/logo.png" alt="AuraFit Logo">
+        </a>
         <nav class="nav-links">
             <a href="/">Início</a>
             <a href="/judo" class="active">Judô</a>
@@ -24,6 +24,13 @@
             <a href="/usuarios" class="btn-admin">PAINEL ADMIN</a>
         </div>
     </header>
+
+    <%
+        const paginaAtual = typeof pagina !== 'undefined' ? Number(pagina) : 1;
+        const totalPaginasAtual = typeof totalPaginas !== 'undefined' ? Number(totalPaginas) : 1;
+        const buscaAtual = typeof busca !== 'undefined' ? busca : '';
+        const ordemAtual = typeof ordem !== 'undefined' ? ordem : '';
+    %>
 
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="container">
@@ -51,6 +58,28 @@
                 <% }); %>
             <% } else { %>
                 <p class="no-products">Nenhum produto cadastrado nesta categoria.</p>
+            <% } %>
+        </div>
+
+        <!-- PAGINAÇÃO -->
+        <div class="paginacao">
+            <% if (paginaAtual > 1) { %>
+                <a class="btn btn-secundario"
+                    href="/judo?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual - 1 %>">
+                    Anterior
+                </a>
+            <% } %>
+
+            <span class="paginacao-info">
+                Página <strong><%= paginaAtual %></strong>
+                de <strong><%= totalPaginasAtual %></strong>
+            </span>
+
+            <% if (paginaAtual < totalPaginasAtual) { %>
+                <a class="btn btn-secundario"
+                    href="/judo?busca=<%= encodeURIComponent(buscaAtual) %>&ordem=<%= ordemAtual %>&pagina=<%= paginaAtual + 1 %>">
+                    Próxima
+                </a>
             <% } %>
         </div>
 

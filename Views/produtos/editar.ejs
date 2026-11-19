@@ -1,0 +1,59 @@
+<%- include('../includes/header', { titulo: "Editar Produto", usuario: typeof usuario !== 'undefined' ? usuario : null }) %>
+
+<main class="conteudo">
+  <div class="cabecalho-conteudo">
+    <div>
+      <h1>Editar Produto</h1>
+      <p>Atualize as informações de <strong><%= produto.nome %></strong>.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <form action="/produtos/editar/<%= produto.id %>" method="POST">
+      <div class="campo-formulario">
+        <label for="nome">Nome do Produto</label>
+        <input type="text" id="nome" name="nome" value="<%= produto.nome %>" required maxlength="100" minlength="3">
+      </div>
+
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="categoria_id">Modalidade (Categoria)</label>
+        <select id="categoria_id" name="categoria_id" required>
+          <% if (typeof categorias !== 'undefined' && categorias.length > 0) { %>
+            <% categorias.forEach(cat => { %>
+              <option value="<%= cat.id %>" <%= cat.id === produto.categoria_id ? 'selected' : '' %>>
+                <%= cat.nome %>
+              </option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="preco">Preço (R$)</label>
+        <input type="number" id="preco" name="preco" step="0.01" min="0" value="<%= produto.preco %>" required>
+      </div>
+
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="estoque_atual">Quantidade em Estoque</label>
+        <input type="number" id="estoque_atual" name="estoque_atual" min="0" value="<%= produto.estoque_atual %>" required>
+      </div>
+
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="imagem_url">Arquivo ou URL da Imagem</label>
+        <input type="text" id="imagem_url" name="imagem_url" value="<%= produto.imagem_url || '' %>">
+      </div>
+
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" name="descricao" rows="3" maxlength="500"><%= produto.descricao || '' %></textarea>
+      </div>
+
+      <div class="botoes-formulario" style="margin-top:20px">
+        <a class="btn btn-muted" href="/produtos">Cancelar</a>
+        <button class="btn btn-primario" type="submit">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('../includes/footer') %>

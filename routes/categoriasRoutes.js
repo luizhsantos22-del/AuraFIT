@@ -70,16 +70,29 @@ router.post('/editar/:id', async (req, res) => {
 
 // Delete
 router.post('/excluir/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
-        await BD.query(
-            'DELETE FROM categorias WHERE id = $1',
-            [id]
-        );
-        res.redirect('/categorias');
-    } catch (erro) {
-        console.log('Erro: ' + erro);
+  const { id } = req.params;
+
+  try {
+    const checkProdutos = await BD.query(
+      'SELECT COUNT(*) AS total FROM produtos WHERE categoria_id = $1',
+      [id]
+    );
+
+    if (Number(checkProdutos.rows[0].total) > 0) {
+      const msg = encodeURIComponent('Não é possível excluir esta categoria pois existem produtos vinculados a ela.');
+      return res.redirect(`/categorias?erro=${msg}`);
     }
+    await BD.query('DELETE FROM categorias WHERE id = $1', [id]);
+    const msgSucesso = encodeURIComponent('Categoria excluída com sucesso!');
+    return res.redirect(`/categorias?sucesso=${msgSucesso}`);
+
+  } catch (erro) {
+    console.error('Erro ao excluir categoria:', erro);
+    const mensagem = erro.code === '23503'
+      ? 'Não é possível excluir esta categoria pois existem produtos vinculados a ela.'
+      : 'Erro ao tentar excluir a categoria.';
+    return res.redirect(`/categorias?erro=${encodeURIComponent(mensagem)}`);
+  }
 });
 
 module.exports = router;

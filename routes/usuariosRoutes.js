@@ -98,14 +98,30 @@ router.post('/editar/:id', async (req, res) => {
 
 // Excluir Usuário
 router.post('/excluir/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        await BD.query('DELETE FROM usuarios WHERE id = $1', [id]);
-        res.redirect('/usuarios');
-    } catch (erro) {
-        console.log('Erro ao excluir usuário: ' + erro);
-        res.status(500).send('Erro ao excluir usuário');
+  const { id } = req.params;
+
+  try {
+    const checkVendas = await BD.query(
+      'SELECT COUNT(*) AS total FROM vendas WHERE usuario_id = $1',
+      [id]
+    );
+
+    if (Number(checkVendas.rows[0].total) > 0) {
+      const msg = encodeURIComponent('Não é possível excluir este usuário pois ele possui vendas registradas no sistema.');
+      return res.redirect(`/usuarios?erro=${msg}`);
     }
+
+    await BD.query('DELETE FROM usuarios WHERE id = $1', [id]);
+    const msgSucesso = encodeURIComponent('Usuário excluído com sucesso!');
+    return res.redirect(`/usuarios?sucesso=${msgSucesso}`);
+
+  } catch (erro) {
+    console.error('Erro ao excluir usuário:', erro);
+    const mensagem = erro.code === '23503'
+      ? 'Não é possível excluir este usuário pois ele possui vendas registradas no sistema.'
+      : 'Erro ao tentar excluir o usuário.';
+    return res.redirect(`/usuarios?erro=${encodeURIComponent(mensagem)}`);
+  }
 });
 
 module.exports = router;

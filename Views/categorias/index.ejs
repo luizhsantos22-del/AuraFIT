@@ -6,6 +6,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Categorias | AuraFit</title>
   <link rel="stylesheet" href="/css/estilo-dash.css">
+  <style>
+    .alerta {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alerta-erro {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+    .alerta-sucesso {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #4ade80;
+    }
+    .alerta button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      line-height: 1;
+    }
+  </style>
 </head>
 
 <body>
@@ -38,6 +68,29 @@
       </div>
       <button type="button" class="btn-primario" onclick="abrirModal()">+ Nova Categoria</button>
     </section>
+
+    <% 
+      const mensagemErro = typeof erro !== 'undefined' && erro ? erro : '';
+      const mensagemSucesso = typeof sucesso !== 'undefined' && sucesso ? sucesso : '';
+    %>
+
+    <!-- ALERTA RENDERIZADO PELO SERVIDOR (SE PASSADO NO RENDER) -->
+    <% if (mensagemErro) { %>
+      <div class="alerta alerta-erro" id="alertaMensagem">
+        <span>⚠️ <%= mensagemErro %></span>
+        <button type="button" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    <% } %>
+
+    <% if (mensagemSucesso) { %>
+      <div class="alerta alerta-sucesso" id="alertaMensagem">
+        <span>✅ <%= mensagemSucesso %></span>
+        <button type="button" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    <% } %>
+
+    <!-- CONTAINER PARA ALERTAS VINDOS VIA QUERY STRING (?erro=... ou ?sucesso=...) -->
+    <div id="alertaUrlContainer"></div>
 
     <% 
       const listaCategorias = typeof categorias !== 'undefined' ? categorias : [];
@@ -168,6 +221,39 @@
   <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
 
   <script>
+    // Lê parâmetros ?erro= ou ?sucesso= da URL e exibe o alerta visual
+    (function exibirAlertaDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const erroUrl = params.get('erro');
+      const sucessoUrl = params.get('sucesso');
+      const container = document.getElementById('alertaUrlContainer');
+
+      if (erroUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-erro">
+            <span>⚠️ ${erroUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+      } else if (sucessoUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-sucesso">
+            <span>✅ ${sucessoUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+      }
+
+      // Limpa os parâmetros da URL para não reexibir o alerta ao atualizar a página (F5)
+      if (erroUrl || sucessoUrl) {
+        params.delete('erro');
+        params.delete('sucesso');
+        const novaQuery = params.toString();
+        const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+        window.history.replaceState({}, '', novaUrl);
+      }
+    })();
+
     function abrirModal() {
       document.getElementById('tituloModal').innerText = 'Nova Categoria';
       document.getElementById('formCategoria').action = '/categorias/novo';

@@ -105,13 +105,31 @@ router.post('/editar/:id', async (req, res) => {
 
 // Excluir Produto
 router.post('/excluir/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        await BD.query('DELETE FROM produtos WHERE id = $1', [id]);
-        res.redirect('/produtos');
-    } catch (erro) {
-        console.log('Erro ao excluir produto: ' + erro);
+  const { id } = req.params;
+
+  try {
+    const checkVendas = await BD.query(
+      'SELECT COUNT(*) AS total FROM itens_venda WHERE produto_id = $1',
+      [id]
+    );
+
+    if (Number(checkVendas.rows[0].total) > 0) {
+      const msg = encodeURIComponent('Não é possível excluir este produto pois ele já está vinculado a uma ou mais vendas.');
+      return res.redirect(`/produtos?erro=${msg}`);
     }
+
+    await BD.query('DELETE FROM produtos WHERE id = $1', [id]);
+    const msgSucesso = encodeURIComponent('Produto excluído com sucesso!');
+    return res.redirect(`/produtos?sucesso=${msgSucesso}`);
+
+  } catch (erro) {
+    console.error('Erro ao excluir produto:', erro);
+
+    const mensagem = erro.code === '23503'
+      ? 'Não é possível excluir este produto pois ele já está vinculado a uma ou mais vendas.'
+      : 'Erro ao tentar excluir o produto.';
+    return res.redirect(`/produtos?erro=${encodeURIComponent(mensagem)}`);
+  }
 });
 
 module.exports = router;

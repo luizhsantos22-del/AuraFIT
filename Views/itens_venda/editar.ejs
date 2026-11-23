@@ -6,6 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editar Item #<%= item.id %> | AuraFit</title>
   <link rel="stylesheet" href="/css/estilo-dash.css">
+  <style>
+    .alerta {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alerta-erro {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+    .alerta button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      line-height: 1;
+    }
+  </style>
 </head>
 
 <body>
@@ -39,8 +64,11 @@
       <a href="/itens_venda" class="btn-cancelar" style="text-decoration: none;">← Voltar</a>
     </section>
 
+    <div id="alertaUrlContainer"></div>
+
     <section class="card-tabela" style="padding: 28px;">
       <form action="/itens_venda/editar/<%= item.id %>" method="POST">
+        <!-- venda_id INTEGER NOT NULL -->
         <div class="form-group">
           <label for="venda_id">Pedido (Venda)</label>
           <select id="venda_id" name="venda_id" required>
@@ -54,6 +82,7 @@
           </select>
         </div>
 
+        <!-- produto_id INTEGER NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="produto_id">Produto / Equipamento</label>
           <select id="produto_id" name="produto_id" required>
@@ -67,14 +96,16 @@
           </select>
         </div>
 
+        <!-- quantidade INTEGER NOT NULL CHECK (quantidade > 0) -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="quantidade">Quantidade</label>
-          <input type="number" id="quantidade" name="quantidade" min="1" value="<%= item.quantidade %>" required>
+          <input type="number" id="quantidade" name="quantidade" min="1" max="2147483647" value="<%= item.quantidade %>" required>
         </div>
 
+        <!-- preco_unitario NUMERIC(10, 2) NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="preco_unitario">Preço Unitário (R$)</label>
-          <input type="number" id="preco_unitario" name="preco_unitario" step="0.01" min="0" value="<%= item.preco_unitario %>" required>
+          <input type="number" id="preco_unitario" name="preco_unitario" step="0.01" min="0" max="99999999.99" value="<%= item.preco_unitario %>" required>
         </div>
 
         <div class="modal-footer" style="margin-top: 24px;">
@@ -87,6 +118,26 @@
 
   <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
 
+  <script>
+    (function exibirAlertaDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const erroUrl = params.get('erro');
+      const container = document.getElementById('alertaUrlContainer');
+
+      if (erroUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-erro">
+            <span>⚠️ ${erroUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+        params.delete('erro');
+        const novaQuery = params.toString();
+        const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+        window.history.replaceState({}, '', novaUrl);
+      }
+    })();
+  </script>
 </body>
 
 </html>

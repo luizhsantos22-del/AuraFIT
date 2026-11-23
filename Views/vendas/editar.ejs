@@ -6,6 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editar Venda #<%= venda.id %> | AuraFit</title>
   <link rel="stylesheet" href="/css/estilo-dash.css">
+  <style>
+    .alerta {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alerta-erro {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+    .alerta button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      line-height: 1;
+    }
+  </style>
 </head>
 
 <body>
@@ -21,6 +46,7 @@
       <li><a href="/categorias">Categorias</a></li>
       <li><a href="/usuarios">Usuários</a></li>
       <li><a href="/vendas" class="ativo">Vendas</a></li>
+      <li><a href="/itens_venda">Itens Venda</a></li>
     </ul>
 
     <div class="user-nav">
@@ -38,8 +64,11 @@
       <a href="/vendas" class="btn-cancelar" style="text-decoration: none;">← Voltar</a>
     </section>
 
+    <div id="alertaUrlContainer"></div>
+
     <section class="card-tabela" style="padding: 28px;">
       <form action="/vendas/editar/<%= venda.id %>" method="POST">
+        <!-- usuario_id INTEGER NOT NULL -->
         <div class="form-group">
           <label for="usuario_id">Cliente</label>
           <select id="usuario_id" name="usuario_id" required>
@@ -53,11 +82,13 @@
           </select>
         </div>
 
+        <!-- valor_total NUMERIC(10, 2) NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="valor_total">Valor Total (R$)</label>
-          <input type="number" id="valor_total" name="valor_total" step="0.01" min="0" value="<%= venda.valor_total %>" required>
+          <input type="number" id="valor_total" name="valor_total" step="0.01" min="0" max="99999999.99" value="<%= venda.valor_total %>" required>
         </div>
 
+        <!-- status VARCHAR(30) NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="status">Status do Pedido</label>
           <select id="status" name="status" required>
@@ -77,6 +108,26 @@
 
   <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
 
+  <script>
+    (function exibirAlertaDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const erroUrl = params.get('erro');
+      const container = document.getElementById('alertaUrlContainer');
+
+      if (erroUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-erro">
+            <span>⚠️ ${erroUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+        params.delete('erro');
+        const novaQuery = params.toString();
+        const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+        window.history.replaceState({}, '', novaUrl);
+      }
+    })();
+  </script>
 </body>
 
 </html>

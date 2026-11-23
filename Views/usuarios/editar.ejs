@@ -6,6 +6,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editar Usuário | AuraFit</title>
   <link rel="stylesheet" href="/css/estilo-dash.css">
+  <style>
+    .alerta {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alerta-erro {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+    .alerta button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      line-height: 1;
+    }
+    .contador-chars {
+      display: block;
+      text-align: right;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+  </style>
 </head>
 
 <body>
@@ -39,23 +71,47 @@
       <a href="/usuarios" class="btn-cancelar" style="text-decoration: none;">← Voltar</a>
     </section>
 
+    <div id="alertaUrlContainer"></div>
+
     <section class="card-tabela" style="padding: 28px;">
       <form action="/usuarios/editar/<%= usuarioEdit.id %>" method="POST">
+        <!-- nome VARCHAR(120) NOT NULL -->
         <div class="form-group">
           <label for="nome">Nome Completo</label>
-          <input type="text" id="nome" name="nome" value="<%= usuarioEdit.nome %>" required maxlength="100" minlength="3" autofocus>
+          <input 
+            type="text" 
+            id="nome" 
+            name="nome" 
+            value="<%= usuarioEdit.nome %>" 
+            required 
+            maxlength="120" 
+            minlength="3" 
+            autofocus
+            oninput="atualizarContadores()">
+          <small class="contador-chars" id="contadorNome"><%= (usuarioEdit.nome || '').length %> / 120 caracteres</small>
         </div>
 
+        <!-- email VARCHAR(150) NOT NULL UNIQUE -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="email">E-mail de Acesso</label>
-          <input type="email" id="email" name="email" value="<%= usuarioEdit.email %>" required maxlength="120">
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            value="<%= usuarioEdit.email %>" 
+            required 
+            maxlength="150"
+            oninput="atualizarContadores()">
+          <small class="contador-chars" id="contadorEmail"><%= (usuarioEdit.email || '').length %> / 150 caracteres</small>
         </div>
 
+        <!-- senha VARCHAR(255) NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="senha">Nova Senha <small style="color: #64748b; font-weight: normal;">(deixe em branco para manter a atual)</small></label>
-          <input type="password" id="senha" name="senha" placeholder="••••••••">
+          <input type="password" id="senha" name="senha" placeholder="••••••••" maxlength="255">
         </div>
 
+        <!-- tipo VARCHAR(20) NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="perfil">Tipo de Usuário</label>
           <select id="perfil" name="perfil" required>
@@ -64,6 +120,7 @@
           </select>
         </div>
 
+        <!-- situacao INTEGER NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="situacao">Status da Conta</label>
           <select id="situacao" name="situacao">
@@ -82,6 +139,44 @@
 
   <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
 
+  <script>
+    function atualizarContadores() {
+      const inputNome = document.getElementById('nome');
+      const contadorNome = document.getElementById('contadorNome');
+      if (inputNome.value.length > 120) {
+        inputNome.value = inputNome.value.slice(0, 120);
+      }
+      contadorNome.innerText = `${inputNome.value.length} / 120 caracteres`;
+      contadorNome.style.color = inputNome.value.length >= 120 ? '#dc2626' : '#64748b';
+
+      const inputEmail = document.getElementById('email');
+      const contadorEmail = document.getElementById('contadorEmail');
+      if (inputEmail.value.length > 150) {
+        inputEmail.value = inputEmail.value.slice(0, 150);
+      }
+      contadorEmail.innerText = `${inputEmail.value.length} / 150 caracteres`;
+      contadorEmail.style.color = inputEmail.value.length >= 150 ? '#dc2626' : '#64748b';
+    }
+
+    (function exibirAlertaDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const erroUrl = params.get('erro');
+      const container = document.getElementById('alertaUrlContainer');
+
+      if (erroUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-erro">
+            <span>⚠️ ${erroUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+        params.delete('erro');
+        const novaQuery = params.toString();
+        const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+        window.history.replaceState({}, '', novaUrl);
+      }
+    })();
+  </script>
 </body>
 
 </html>

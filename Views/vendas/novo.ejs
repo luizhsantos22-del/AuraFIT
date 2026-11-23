@@ -6,6 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nova Venda | AuraFit</title>
   <link rel="stylesheet" href="/css/estilo-dash.css">
+  <style>
+    .alerta {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alerta-erro {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+    .alerta button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      line-height: 1;
+    }
+  </style>
 </head>
 
 <body>
@@ -39,8 +64,11 @@
       <a href="/vendas" class="btn-cancelar" style="text-decoration: none;">← Voltar</a>
     </section>
 
+    <div id="alertaUrlContainer"></div>
+
     <section class="card-tabela" style="padding: 28px;">
       <form action="/vendas/novo" method="POST">
+        <!-- usuario_id INTEGER NOT NULL -->
         <div class="form-group">
           <label for="usuario_id">Cliente</label>
           <select id="usuario_id" name="usuario_id" required autofocus>
@@ -53,6 +81,7 @@
           </select>
         </div>
 
+        <!-- produto_id INTEGER NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="produto_id">Produto / Equipamento</label>
           <select id="produto_id" name="produto_id" required onchange="atualizarTotal()">
@@ -67,14 +96,16 @@
           </select>
         </div>
 
+        <!-- quantidade INTEGER NOT NULL CHECK (quantidade > 0) -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="quantidade">Quantidade</label>
-          <input type="number" id="quantidade" name="quantidade" min="1" value="1" required oninput="atualizarTotal()">
+          <input type="number" id="quantidade" name="quantidade" min="1" max="2147483647" value="1" required oninput="atualizarTotal()">
         </div>
 
+        <!-- status VARCHAR(30) NOT NULL -->
         <div class="form-group" style="margin-top: 16px;">
           <label for="status">Status do Pedido</label>
-          <select id="status" name="status">
+          <select id="status" name="status" required>
             <option value="concluida" selected>Concluída (Pago)</option>
             <option value="pendente">Pendente</option>
             <option value="cancelada">Cancelada</option>
@@ -105,7 +136,7 @@
       const preco = parseFloat(opcao.getAttribute('data-preco')) || 0;
       const estoque = parseInt(opcao.getAttribute('data-estoque')) || 0;
 
-      if (estoque > 0) inputQtd.max = estoque;
+      inputQtd.max = estoque > 0 ? estoque : 2147483647;
 
       const qtd = parseInt(inputQtd.value) || 0;
       const total = preco * qtd;
@@ -115,6 +146,25 @@
         currency: 'BRL'
       });
     }
+
+    (function exibirAlertaDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const erroUrl = params.get('erro');
+      const container = document.getElementById('alertaUrlContainer');
+
+      if (erroUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-erro">
+            <span>⚠️ ${erroUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+        params.delete('erro');
+        const novaQuery = params.toString();
+        const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+        window.history.replaceState({}, '', novaUrl);
+      }
+    })();
   </script>
 </body>
 

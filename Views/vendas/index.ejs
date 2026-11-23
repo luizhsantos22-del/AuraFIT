@@ -6,6 +6,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Vendas | AuraFit</title>
   <link rel="stylesheet" href="/css/estilo-dash.css">
+  <style>
+    .alerta {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alerta-erro {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+    .alerta-sucesso {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #4ade80;
+    }
+    .alerta button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      line-height: 1;
+    }
+  </style>
 </head>
 
 <body>
@@ -38,6 +68,27 @@
       </div>
       <button type="button" class="btn-primario" onclick="abrirModal()">+ Nova Venda</button>
     </section>
+
+    <% 
+      const mensagemErro = typeof erro !== 'undefined' && erro ? erro : '';
+      const mensagemSucesso = typeof sucesso !== 'undefined' && sucesso ? sucesso : '';
+    %>
+
+    <% if (mensagemErro) { %>
+      <div class="alerta alerta-erro" id="alertaMensagem">
+        <span>⚠️ <%= mensagemErro %></span>
+        <button type="button" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    <% } %>
+
+    <% if (mensagemSucesso) { %>
+      <div class="alerta alerta-sucesso" id="alertaMensagem">
+        <span>✅ <%= mensagemSucesso %></span>
+        <button type="button" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    <% } %>
+
+    <div id="alertaUrlContainer"></div>
 
     <% 
       const listaVendas = typeof vendas !== 'undefined' ? vendas : [];
@@ -176,7 +227,7 @@
     </section>
   </main>
 
-  <!-- MODAL CADASTRAR / EDITAR VENDA (NA PRÓPRIA PÁGINA) -->
+  <!-- MODAL CADASTRAR / EDITAR VENDA -->
   <div class="modal-overlay" id="modalVenda">
     <div class="modal-box">
       <div class="modal-header">
@@ -185,6 +236,7 @@
       </div>
 
       <form id="formVenda" action="/vendas/novo" method="POST">
+        <!-- usuario_id INTEGER NOT NULL -->
         <div class="form-group">
           <label for="usuario_id">Cliente</label>
           <select id="usuario_id" name="usuario_id" required>
@@ -197,33 +249,41 @@
 
         <!-- Campos exclusivos para Nova Venda -->
         <div id="camposNovaVenda">
+          <!-- produto_id INTEGER NOT NULL -->
           <div class="form-group" style="margin-top: 12px;">
             <label for="produto_id">Produto / Equipamento</label>
-            <select id="produto_id" name="produto_id" onchange="atualizarTotal()">
-              <option value="" data-preco="0">Selecione um produto...</option>
+            <select id="produto_id" name="produto_id" onchange="atualizarTotalModal()">
+              <option value="" data-preco="0" data-estoque="0">Selecione um produto...</option>
               <% listaProdutos.forEach(p => { %>
-                <option value="<%= p.id %>" data-preco="<%= p.preco %>">
+                <option value="<%= p.id %>" data-preco="<%= p.preco %>" data-estoque="<%= p.estoque_atual %>">
                   <%= p.nome %> — R$ <%= Number(p.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %> (Estoque: <%= p.estoque_atual %>)
                 </option>
               <% }) %>
             </select>
           </div>
 
+          <!-- quantidade INTEGER NOT NULL CHECK (quantidade > 0) -->
           <div class="form-group" style="margin-top: 12px;">
             <label for="quantidade">Quantidade</label>
-            <input type="number" id="quantidade" name="quantidade" min="1" value="1" oninput="atualizarTotal()">
+            <input type="number" id="quantidade" name="quantidade" min="1" max="2147483647" value="1" oninput="atualizarTotalModal()">
+          </div>
+
+          <div style="margin-top: 12px; padding: 10px 14px; background-color: #f4f7f5; border-left: 4px solid #175936; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #64748b;">Total Estimado:</span>
+            <strong id="valorTotalModalPreview" style="font-size: 16px; color: #175936;">R$ 0,00</strong>
           </div>
         </div>
 
-        <!-- Campo exclusivo para Edição de Valor Total -->
+        <!-- valor_total NUMERIC(10, 2) NOT NULL -->
         <div id="campoEditarValor" class="form-group" style="display: none; margin-top: 12px;">
           <label for="valor_total">Valor Total (R$)</label>
-          <input type="number" id="valor_total" name="valor_total" step="0.01" min="0">
+          <input type="number" id="valor_total" name="valor_total" step="0.01" min="0" max="99999999.99">
         </div>
 
+        <!-- status VARCHAR(30) NOT NULL -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="status">Status do Pedido</label>
-          <select id="status" name="status">
+          <select id="status" name="status" required>
             <option value="concluida">Concluída (Pago)</option>
             <option value="pendente">Pendente</option>
             <option value="cancelada">Cancelada</option>
@@ -241,12 +301,64 @@
   <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
 
   <script>
+    (function exibirAlertaDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const erroUrl = params.get('erro');
+      const sucessoUrl = params.get('sucesso');
+      const container = document.getElementById('alertaUrlContainer');
+
+      if (erroUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-erro">
+            <span>⚠️ ${erroUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+      } else if (sucessoUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-sucesso">
+            <span>✅ ${sucessoUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+      }
+
+      if (erroUrl || sucessoUrl) {
+        params.delete('erro');
+        params.delete('sucesso');
+        const novaQuery = params.toString();
+        const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+        window.history.replaceState({}, '', novaUrl);
+      }
+    })();
+
     let statusAtual = 'todos';
+
+    function atualizarTotalModal() {
+      const select = document.getElementById('produto_id');
+      const inputQtd = document.getElementById('quantidade');
+      const opcao = select.options[select.selectedIndex];
+
+      const preco = parseFloat(opcao.getAttribute('data-preco')) || 0;
+      const estoque = parseInt(opcao.getAttribute('data-estoque')) || 0;
+
+      inputQtd.max = estoque > 0 ? estoque : 2147483647;
+
+      const qtd = parseInt(inputQtd.value) || 0;
+      const total = preco * qtd;
+
+      document.getElementById('valorTotalModalPreview').innerText = total.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    }
 
     function abrirModal() {
       document.getElementById('tituloModal').innerText = 'Nova Venda';
       document.getElementById('formVenda').action = '/vendas/novo';
       document.getElementById('formVenda').reset();
+      document.getElementById('quantidade').value = '1';
+      document.getElementById('quantidade').max = '2147483647';
 
       document.getElementById('camposNovaVenda').style.display = 'block';
       document.getElementById('produto_id').required = true;
@@ -255,6 +367,7 @@
       document.getElementById('campoEditarValor').style.display = 'none';
       document.getElementById('valor_total').required = false;
 
+      atualizarTotalModal();
       document.getElementById('modalVenda').classList.add('aberto');
     }
 

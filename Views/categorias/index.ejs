@@ -35,6 +35,13 @@
       color: inherit;
       line-height: 1;
     }
+    .contador-chars {
+      display: block;
+      text-align: right;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
   </style>
 </head>
 
@@ -200,14 +207,32 @@
       </div>
 
       <form id="formCategoria" action="/categorias/novo" method="POST">
+        <!-- nome VARCHAR(80) NOT NULL UNIQUE -->
         <div class="form-group">
           <label for="nome">Nome da Modalidade</label>
-          <input type="text" id="nome" name="nome" placeholder="Ex: Jiu-Jitsu, Boxe, MMA..." required maxlength="80" minlength="2">
+          <input 
+            type="text" 
+            id="nome" 
+            name="nome" 
+            placeholder="Ex: Jiu-Jitsu, Boxe, MMA..." 
+            required 
+            maxlength="80" 
+            minlength="2"
+            oninput="atualizarContadores()">
+          <small class="contador-chars" id="contadorNome">0 / 80 caracteres</small>
         </div>
 
+        <!-- descricao VARCHAR(255) -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="descricao">Descrição</label>
-          <textarea id="descricao" name="descricao" rows="3" placeholder="Breve descrição da modalidade esportiva..." maxlength="255"></textarea>
+          <textarea 
+            id="descricao" 
+            name="descricao" 
+            rows="3" 
+            placeholder="Breve descrição da modalidade esportiva..." 
+            maxlength="255"
+            oninput="atualizarContadores()"></textarea>
+          <small class="contador-chars" id="contadorDescricao">0 / 255 caracteres</small>
         </div>
 
         <div class="modal-footer">
@@ -254,10 +279,29 @@
       }
     })();
 
+    function atualizarContadores() {
+      const inputNome = document.getElementById('nome');
+      const contadorNome = document.getElementById('contadorNome');
+      if (inputNome.value.length > 80) {
+        inputNome.value = inputNome.value.slice(0, 80);
+      }
+      contadorNome.innerText = `${inputNome.value.length} / 80 caracteres`;
+      contadorNome.style.color = inputNome.value.length >= 80 ? '#dc2626' : '#64748b';
+
+      const inputDesc = document.getElementById('descricao');
+      const contadorDesc = document.getElementById('contadorDescricao');
+      if (inputDesc.value.length > 255) {
+        inputDesc.value = inputDesc.value.slice(0, 255);
+      }
+      contadorDesc.innerText = `${inputDesc.value.length} / 255 caracteres`;
+      contadorDesc.style.color = inputDesc.value.length >= 255 ? '#dc2626' : '#64748b';
+    }
+
     function abrirModal() {
       document.getElementById('tituloModal').innerText = 'Nova Categoria';
       document.getElementById('formCategoria').action = '/categorias/novo';
       document.getElementById('formCategoria').reset();
+      atualizarContadores();
       document.getElementById('modalCategoria').classList.add('aberto');
     }
 
@@ -270,6 +314,7 @@
       document.getElementById('formCategoria').action = '/categorias/editar/' + id;
       document.getElementById('nome').value = nome;
       document.getElementById('descricao').value = descricao;
+      atualizarContadores();
       document.getElementById('modalCategoria').classList.add('aberto');
     }
 

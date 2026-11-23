@@ -1,45 +1,141 @@
-<%- include('../includes/header', { titulo: "Cadastrar Usuário", usuario: typeof usuario !== 'undefined' ? usuario : null }) %>
+<%- include('../includes/header', { titulo: "Cadastrar Produto", usuario: typeof usuario !== 'undefined' ? usuario : null }) %>
+
+<style>
+  .alerta {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .alerta-erro {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+  }
+  .alerta button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: inherit;
+    line-height: 1;
+  }
+  .contador-chars {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 4px;
+  }
+</style>
 
 <main class="conteudo">
   <div class="cabecalho-conteudo">
     <div>
-      <h1>Cadastrar Usuário</h1>
-      <p>Adicione um novo administrador ou operador com acesso ao painel da AuraFit.</p>
+      <h1>Cadastrar Produto</h1>
+      <p>Adicione um novo equipamento esportivo ao catálogo da AuraFit.</p>
     </div>
   </div>
 
+  <!-- Banner de erro caso seja redirecionado com ?erro=... -->
+  <div id="alertaUrlContainer"></div>
+
   <div class="card">
-    <form action="/usuarios/novo" method="POST">
+    <form action="/produtos/novo" method="POST">
+      <!-- nome VARCHAR(150) NOT NULL -->
       <div class="campo-formulario">
-        <label for="nome">Nome Completo</label>
-        <input type="text" id="nome" name="nome" placeholder="Ex.: Carlos Silva" required maxlength="100" minlength="3" autofocus>
+        <label for="nome">Nome do Produto</label>
+        <input 
+          type="text" 
+          id="nome" 
+          name="nome" 
+          placeholder="Ex.: Kimono Judô Trançado Reforçado" 
+          required 
+          maxlength="150" 
+          minlength="3" 
+          autofocus
+          oninput="atualizarContadorNome()">
+        <small class="contador-chars" id="contadorNome">0 / 150 caracteres</small>
       </div>
 
+      <!-- categoria_id INTEGER NOT NULL -->
       <div class="campo-formulario" style="margin-top:16px">
-        <label for="email">E-mail de Acesso</label>
-        <input type="email" id="email" name="email" placeholder="Ex.: carlos@aurafit.com.br" required maxlength="120">
-      </div>
-
-      <div class="campo-formulario" style="margin-top:16px">
-        <label for="senha">Senha</label>
-        <input type="password" id="senha" name="senha" placeholder="••••••••" required minlength="6">
-      </div>
-
-      <div class="campo-formulario" style="margin-top:16px">
-        <label for="perfil">Perfil de Acesso</label>
-        <select id="perfil" name="perfil" required>
-          <option value="">Selecione um perfil...</option>
-          <option value="Administrador Geral">Administrador Geral</option>
-          <option value="Organizador">Organizador</option>
+        <label for="categoria_id">Modalidade (Categoria)</label>
+        <select id="categoria_id" name="categoria_id" required>
+          <option value="">Selecione uma modalidade...</option>
+          <% if (typeof categorias !== 'undefined' && categorias.length > 0) { %>
+            <% categorias.forEach(cat => { %>
+              <option value="<%= cat.id %>"><%= cat.nome %></option>
+            <% }) %>
+          <% } %>
         </select>
       </div>
 
+      <!-- preco NUMERIC(10, 2) NOT NULL CHECK (preco >= 0) -->
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="preco">Preço (R$)</label>
+        <input type="number" id="preco" name="preco" step="0.01" min="0" max="99999999.99" placeholder="Ex.: 299.90" required>
+      </div>
+
+      <!-- estoque_atual INTEGER NOT NULL CHECK (estoque_atual >= 0) -->
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="estoque_atual">Quantidade em Estoque</label>
+        <input type="number" id="estoque_atual" name="estoque_atual" min="0" max="2147483647" placeholder="Ex.: 15" required>
+      </div>
+
+      <!-- imagem_url VARCHAR(255) -->
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="imagem_url">Arquivo ou URL da Imagem</label>
+        <input type="text" id="imagem_url" name="imagem_url" maxlength="255" placeholder="Ex.: kimono-judo.jpg">
+      </div>
+
+      <!-- descricao TEXT -->
+      <div class="campo-formulario" style="margin-top:16px">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" name="descricao" rows="3" placeholder="Detalhes técnicos, material, tamanho..."></textarea>
+      </div>
+
       <div class="botoes-formulario" style="margin-top:20px">
-        <a class="btn btn-muted" href="/usuarios">Cancelar</a>
-        <button class="btn btn-primario" type="submit">Salvar Usuário</button>
+        <a class="btn btn-muted" href="/produtos">Cancelar</a>
+        <button class="btn btn-primario" type="submit">Salvar Produto</button>
       </div>
     </form>
   </div>
 </main>
+
+<script>
+  function atualizarContadorNome() {
+    const input = document.getElementById('nome');
+    const contador = document.getElementById('contadorNome');
+    if (input.value.length > 150) {
+      input.value = input.value.slice(0, 150);
+    }
+    contador.innerText = `${input.value.length} / 150 caracteres`;
+    contador.style.color = input.value.length >= 150 ? '#dc2626' : '#64748b';
+  }
+
+  (function exibirAlertaDaUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const erroUrl = params.get('erro');
+    const container = document.getElementById('alertaUrlContainer');
+
+    if (erroUrl && container) {
+      container.innerHTML = `
+        <div class="alerta alerta-erro">
+          <span>⚠️ ${erroUrl}</span>
+          <button type="button" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+      `;
+      params.delete('erro');
+      const novaQuery = params.toString();
+      const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+      window.history.replaceState({}, '', novaUrl);
+    }
+  })();
+</script>
 
 <%- include('../includes/footer') %>

@@ -35,6 +35,13 @@
       color: inherit;
       line-height: 1;
     }
+    .contador-chars {
+      display: block;
+      text-align: right;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
   </style>
 </head>
 
@@ -109,7 +116,6 @@
       const totalEstoque = listaProdutos.reduce((acc, p) => acc + Number(p.estoque_atual || 0), 0);
       const estoqueBaixo = listaProdutos.filter(p => Number(p.estoque_atual || 0) <= 5).length;
 
-      // Garante as 3 categorias do INSERT nas abas de filtro + eventuais extras do banco
       const nomesBase = ['Judô', 'Muay Thai', 'Crossfit'];
       const abasFiltro = [...nomesBase];
       listaCategorias.forEach(cat => {
@@ -250,11 +256,22 @@
       </div>
 
       <form id="formProduto" action="/produtos/novo" method="POST">
+        <!-- nome VARCHAR(150) NOT NULL -->
         <div class="form-group">
           <label for="nome">Nome do Produto</label>
-          <input type="text" id="nome" name="nome" placeholder="Ex: Kimono Judô Trançado Reforçado" required>
+          <input 
+            type="text" 
+            id="nome" 
+            name="nome" 
+            placeholder="Ex: Kimono Judô Trançado Reforçado" 
+            required 
+            maxlength="150" 
+            minlength="3"
+            oninput="atualizarContadorNome()">
+          <small class="contador-chars" id="contadorNome">0 / 150 caracteres</small>
         </div>
 
+        <!-- categoria_id INTEGER NOT NULL -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="categoria_id">Modalidade</label>
           <select id="categoria_id" name="categoria_id" required>
@@ -265,21 +282,25 @@
           </select>
         </div>
 
+        <!-- preco NUMERIC(10, 2) NOT NULL CHECK (preco >= 0) -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="preco">Preço (R$)</label>
-          <input type="number" id="preco" name="preco" step="0.01" min="0" placeholder="299.90" required>
+          <input type="number" id="preco" name="preco" step="0.01" min="0" max="99999999.99" placeholder="299.90" required>
         </div>
 
+        <!-- estoque_atual INTEGER NOT NULL CHECK (estoque_atual >= 0) -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="estoque_atual">Estoque Atual</label>
-          <input type="number" id="estoque_atual" name="estoque_atual" min="0" placeholder="15" required>
+          <input type="number" id="estoque_atual" name="estoque_atual" min="0" max="2147483647" placeholder="15" required>
         </div>
 
+        <!-- imagem_url VARCHAR(255) -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="imagem_url">Arquivo ou URL da Imagem</label>
-          <input type="text" id="imagem_url" name="imagem_url" placeholder="Ex: kimono.jpg">
+          <input type="text" id="imagem_url" name="imagem_url" maxlength="255" placeholder="Ex: kimono.jpg">
         </div>
 
+        <!-- descricao TEXT -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="descricao">Descrição</label>
           <textarea id="descricao" name="descricao" rows="2" placeholder="Detalhes do equipamento..."></textarea>
@@ -296,7 +317,6 @@
   <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
 
   <script>
-    // Lê parâmetros ?erro= ou ?sucesso= da URL e exibe o alerta visual
     (function exibirAlertaDaUrl() {
       const params = new URLSearchParams(window.location.search);
       const erroUrl = params.get('erro');
@@ -319,7 +339,6 @@
         `;
       }
 
-      // Limpa a URL para não reexibir o alerta se o usuário atualizar a página (F5)
       if (erroUrl || sucessoUrl) {
         params.delete('erro');
         params.delete('sucesso');
@@ -328,6 +347,16 @@
         window.history.replaceState({}, '', novaUrl);
       }
     })();
+
+    function atualizarContadorNome() {
+      const input = document.getElementById('nome');
+      const contador = document.getElementById('contadorNome');
+      if (input.value.length > 150) {
+        input.value = input.value.slice(0, 150);
+      }
+      contador.innerText = `${input.value.length} / 150 caracteres`;
+      contador.style.color = input.value.length >= 150 ? '#dc2626' : '#64748b';
+    }
 
     let categoriaAtual = 'todos';
 
@@ -344,6 +373,7 @@
       document.getElementById('tituloModal').innerText = 'Novo Produto';
       document.getElementById('formProduto').action = '/produtos/novo';
       document.getElementById('formProduto').reset();
+      atualizarContadorNome();
       document.getElementById('modalProduto').classList.add('aberto');
     }
 
@@ -359,6 +389,7 @@
       document.getElementById('estoque_atual').value = botao.getAttribute('data-estoque');
       document.getElementById('imagem_url').value = botao.getAttribute('data-imagem');
 
+      atualizarContadorNome();
       document.getElementById('modalProduto').classList.add('aberto');
     }
 

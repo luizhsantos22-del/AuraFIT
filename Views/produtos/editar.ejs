@@ -1,5 +1,38 @@
 <%- include('../includes/header', { titulo: "Editar Produto", usuario: typeof usuario !== 'undefined' ? usuario : null }) %>
 
+<style>
+  .alerta {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .alerta-erro {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+  }
+  .alerta button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: inherit;
+    line-height: 1;
+  }
+  .contador-chars {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 4px;
+  }
+</style>
+
 <main class="conteudo">
   <div class="cabecalho-conteudo">
     <div>
@@ -8,13 +41,27 @@
     </div>
   </div>
 
+  <!-- Banner de erro caso seja redirecionado com ?erro=... -->
+  <div id="alertaUrlContainer"></div>
+
   <div class="card">
-    <form action="/produtos/editar/<%= produto.id %>" method="POST">
+    <form action="/produtos/editar/<%= produto.id %>" method="POST" id="formEditarProduto">
+      <!-- nome VARCHAR(150) NOT NULL -->
       <div class="campo-formulario">
         <label for="nome">Nome do Produto</label>
-        <input type="text" id="nome" name="nome" value="<%= produto.nome %>" required maxlength="100" minlength="3">
+        <input 
+          type="text" 
+          id="nome" 
+          name="nome" 
+          value="<%= produto.nome %>" 
+          required 
+          maxlength="150" 
+          minlength="3"
+          oninput="atualizarContadorNome()">
+        <small class="contador-chars" id="contadorNome"><%= (produto.nome || '').length %> / 150 caracteres</small>
       </div>
 
+      <!-- categoria_id INTEGER NOT NULL -->
       <div class="campo-formulario" style="margin-top:16px">
         <label for="categoria_id">Modalidade (Categoria)</label>
         <select id="categoria_id" name="categoria_id" required>
@@ -28,24 +75,28 @@
         </select>
       </div>
 
+      <!-- preco NUMERIC(10, 2) NOT NULL CHECK (preco >= 0) -->
       <div class="campo-formulario" style="margin-top:16px">
         <label for="preco">Preço (R$)</label>
-        <input type="number" id="preco" name="preco" step="0.01" min="0" value="<%= produto.preco %>" required>
+        <input type="number" id="preco" name="preco" step="0.01" min="0" max="99999999.99" value="<%= produto.preco %>" required>
       </div>
 
+      <!-- estoque_atual INTEGER NOT NULL CHECK (estoque_atual >= 0) -->
       <div class="campo-formulario" style="margin-top:16px">
         <label for="estoque_atual">Quantidade em Estoque</label>
-        <input type="number" id="estoque_atual" name="estoque_atual" min="0" value="<%= produto.estoque_atual %>" required>
+        <input type="number" id="estoque_atual" name="estoque_atual" min="0" max="2147483647" value="<%= produto.estoque_atual %>" required>
       </div>
 
+      <!-- imagem_url VARCHAR(255) -->
       <div class="campo-formulario" style="margin-top:16px">
         <label for="imagem_url">Arquivo ou URL da Imagem</label>
-        <input type="text" id="imagem_url" name="imagem_url" value="<%= produto.imagem_url || '' %>">
+        <input type="text" id="imagem_url" name="imagem_url" maxlength="255" value="<%= produto.imagem_url || '' %>">
       </div>
 
+      <!-- descricao TEXT -->
       <div class="campo-formulario" style="margin-top:16px">
         <label for="descricao">Descrição</label>
-        <textarea id="descricao" name="descricao" rows="3" maxlength="500"><%= produto.descricao || '' %></textarea>
+        <textarea id="descricao" name="descricao" rows="3"><%= produto.descricao || '' %></textarea>
       </div>
 
       <div class="botoes-formulario" style="margin-top:20px">
@@ -55,5 +106,36 @@
     </form>
   </div>
 </main>
+
+<script>
+  function atualizarContadorNome() {
+    const input = document.getElementById('nome');
+    const contador = document.getElementById('contadorNome');
+    if (input.value.length > 150) {
+      input.value = input.value.slice(0, 150);
+    }
+    contador.innerText = `${input.value.length} / 150 caracteres`;
+    contador.style.color = input.value.length >= 150 ? '#dc2626' : '#64748b';
+  }
+
+  (function exibirAlertaDaUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const erroUrl = params.get('erro');
+    const container = document.getElementById('alertaUrlContainer');
+
+    if (erroUrl && container) {
+      container.innerHTML = `
+        <div class="alerta alerta-erro">
+          <span>⚠️ ${erroUrl}</span>
+          <button type="button" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+      `;
+      params.delete('erro');
+      const novaQuery = params.toString();
+      const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+      window.history.replaceState({}, '', novaUrl);
+    }
+  })();
+</script>
 
 <%- include('../includes/footer') %>

@@ -6,6 +6,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Itens Venda | AuraFit</title>
   <link rel="stylesheet" href="/css/estilo-dash.css">
+  <style>
+    .alerta {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alerta-erro {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+    .alerta-sucesso {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #4ade80;
+    }
+    .alerta button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      line-height: 1;
+    }
+  </style>
 </head>
 
 <body>
@@ -38,6 +68,27 @@
       </div>
       <button type="button" class="btn-primario" onclick="abrirModal()">+ Novo Item Venda</button>
     </section>
+
+    <% 
+      const mensagemErro = typeof erro !== 'undefined' && erro ? erro : '';
+      const mensagemSucesso = typeof sucesso !== 'undefined' && sucesso ? sucesso : '';
+    %>
+
+    <% if (mensagemErro) { %>
+      <div class="alerta alerta-erro" id="alertaMensagem">
+        <span>⚠️ <%= mensagemErro %></span>
+        <button type="button" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    <% } %>
+
+    <% if (mensagemSucesso) { %>
+      <div class="alerta alerta-sucesso" id="alertaMensagem">
+        <span>✅ <%= mensagemSucesso %></span>
+        <button type="button" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    <% } %>
+
+    <div id="alertaUrlContainer"></div>
 
     <% 
       const listaItens = typeof itens !== 'undefined' ? itens : [];
@@ -160,6 +211,7 @@
       </div>
 
       <form id="formItem" action="/itens_venda/novo" method="POST">
+        <!-- venda_id INTEGER NOT NULL -->
         <div class="form-group">
           <label for="venda_id">Pedido (Venda)</label>
           <select id="venda_id" name="venda_id" required>
@@ -170,6 +222,7 @@
           </select>
         </div>
 
+        <!-- produto_id INTEGER NOT NULL -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="produto_id">Produto / Equipamento</label>
           <select id="produto_id" name="produto_id" required onchange="atualizarPreco()">
@@ -182,14 +235,16 @@
           </select>
         </div>
 
+        <!-- quantidade INTEGER NOT NULL CHECK (quantidade > 0) -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="quantidade">Quantidade</label>
-          <input type="number" id="quantidade" name="quantidade" min="1" value="1" required>
+          <input type="number" id="quantidade" name="quantidade" min="1" max="2147483647" value="1" required>
         </div>
 
+        <!-- preco_unitario NUMERIC(10, 2) NOT NULL -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="preco_unitario">Preço Unitário (R$)</label>
-          <input type="number" id="preco_unitario" name="preco_unitario" step="0.01" min="0" placeholder="0.00" required>
+          <input type="number" id="preco_unitario" name="preco_unitario" step="0.01" min="0" max="99999999.99" placeholder="0.00" required>
         </div>
 
         <div class="modal-footer">
@@ -203,6 +258,37 @@
   <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
 
   <script>
+    (function exibirAlertaDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const erroUrl = params.get('erro');
+      const sucessoUrl = params.get('sucesso');
+      const container = document.getElementById('alertaUrlContainer');
+
+      if (erroUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-erro">
+            <span>⚠️ ${erroUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+      } else if (sucessoUrl && container) {
+        container.innerHTML = `
+          <div class="alerta alerta-sucesso">
+            <span>✅ ${sucessoUrl}</span>
+            <button type="button" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        `;
+      }
+
+      if (erroUrl || sucessoUrl) {
+        params.delete('erro');
+        params.delete('sucesso');
+        const novaQuery = params.toString();
+        const novaUrl = window.location.pathname + (novaQuery ? '?' + novaQuery : '');
+        window.history.replaceState({}, '', novaUrl);
+      }
+    })();
+
     function abrirModal() {
       document.getElementById('tituloModal').innerText = 'Novo Item Venda';
       document.getElementById('formItem').action = '/itens_venda/novo';

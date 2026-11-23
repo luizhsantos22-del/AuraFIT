@@ -35,6 +35,13 @@
       color: inherit;
       line-height: 1;
     }
+    .contador-chars {
+      display: block;
+      text-align: right;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
   </style>
 </head>
 
@@ -225,21 +232,49 @@
       </div>
 
       <form id="formUsuario" action="/usuarios/novo" method="POST">
+        <!-- nome VARCHAR(120) NOT NULL -->
         <div class="form-group">
           <label for="nome">Nome Completo</label>
-          <input type="text" id="nome" name="nome" placeholder="Ex: Carlos Silva" required>
+          <input 
+            type="text" 
+            id="nome" 
+            name="nome" 
+            placeholder="Ex: Carlos Silva" 
+            required 
+            maxlength="120" 
+            minlength="3"
+            oninput="atualizarContadores()">
+          <small class="contador-chars" id="contadorNome">0 / 120 caracteres</small>
         </div>
 
+        <!-- email VARCHAR(150) NOT NULL UNIQUE -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="email">E-mail de Acesso</label>
-          <input type="email" id="email" name="email" placeholder="carlos@aurafit.com.br" required>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="carlos@aurafit.com.br" 
+            required 
+            maxlength="150"
+            oninput="atualizarContadores()">
+          <small class="contador-chars" id="contadorEmail">0 / 150 caracteres</small>
         </div>
 
+        <!-- senha VARCHAR(255) NOT NULL -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="senha" id="labelSenha">Senha</label>
-          <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+          <input 
+            type="password" 
+            id="senha" 
+            name="senha" 
+            placeholder="••••••••" 
+            required 
+            maxlength="255" 
+            minlength="6">
         </div>
 
+        <!-- tipo VARCHAR(20) NOT NULL -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="perfil">Tipo de Usuário</label>
           <select id="perfil" name="perfil" required>
@@ -248,6 +283,7 @@
           </select>
         </div>
 
+        <!-- situacao INTEGER NOT NULL -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="situacao">Status da Conta</label>
           <select id="situacao" name="situacao">
@@ -267,7 +303,6 @@
   <footer class="footer">© 2026 AuraFit - Sistema de Vendas Esportiva</footer>
 
   <script>
-    // Lê parâmetros ?erro= ou ?sucesso= da URL e exibe o alerta visual
     (function exibirAlertaDaUrl() {
       const params = new URLSearchParams(window.location.search);
       const erroUrl = params.get('erro');
@@ -290,7 +325,6 @@
         `;
       }
 
-      // Limpa a URL para não reexibir o alerta ao atualizar a página (F5)
       if (erroUrl || sucessoUrl) {
         params.delete('erro');
         params.delete('sucesso');
@@ -299,6 +333,24 @@
         window.history.replaceState({}, '', novaUrl);
       }
     })();
+
+    function atualizarContadores() {
+      const inputNome = document.getElementById('nome');
+      const contadorNome = document.getElementById('contadorNome');
+      if (inputNome.value.length > 120) {
+        inputNome.value = inputNome.value.slice(0, 120);
+      }
+      contadorNome.innerText = `${inputNome.value.length} / 120 caracteres`;
+      contadorNome.style.color = inputNome.value.length >= 120 ? '#dc2626' : '#64748b';
+
+      const inputEmail = document.getElementById('email');
+      const contadorEmail = document.getElementById('contadorEmail');
+      if (inputEmail.value.length > 150) {
+        inputEmail.value = inputEmail.value.slice(0, 150);
+      }
+      contadorEmail.innerText = `${inputEmail.value.length} / 150 caracteres`;
+      contadorEmail.style.color = inputEmail.value.length >= 150 ? '#dc2626' : '#64748b';
+    }
 
     let perfilAtual = 'todos';
 
@@ -309,9 +361,11 @@
 
       document.getElementById('labelSenha').innerText = 'Senha';
       document.getElementById('senha').required = true;
+      document.getElementById('senha').minLength = 6;
       document.getElementById('perfil').value = 'cliente';
       document.getElementById('situacao').value = '1';
 
+      atualizarContadores();
       document.getElementById('modalUsuario').classList.add('aberto');
     }
 
@@ -327,7 +381,9 @@
       document.getElementById('labelSenha').innerText = 'Nova Senha (deixe em branco para manter)';
       document.getElementById('senha').value = '';
       document.getElementById('senha').required = false;
+      document.getElementById('senha').removeAttribute('minlength');
 
+      atualizarContadores();
       document.getElementById('modalUsuario').classList.add('aberto');
     }
 
